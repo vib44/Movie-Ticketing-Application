@@ -1,5 +1,5 @@
 const express=require("express")
-
+const bcrypt=require("bcrypt");
 const User=require("../models/user_models.js")
 
 const userRouter= express.Router();// router form exprrss
@@ -20,6 +20,10 @@ userRouter.post("/register", async(req,res)=>
                     message: "User already exists with this email"
                 })
         }
+        //hashing pwd
+        const salt=await bcrypt.genSalt() //default 10 rounds
+        const hashedpwd=bcrypt.hashSync(req.body.password,salt)
+        req.body.password=hashedpwd;
         const newUser= await User(req.body);
         await newUser.save();
         res.send(
@@ -34,4 +38,33 @@ userRouter.post("/register", async(req,res)=>
     }
 })
 
+
+//user login 
+
+userRouter.post("/login",async(req,res)=>
+{
+    try{
+        const user= await User.findOne(req.body.email)
+        if(!user)
+        {
+            return res.send(
+                {
+                    success: false,
+                    message: "User does not exist. Please register"
+                }
+            )
+        }
+        if(user.password !==req.body.password)
+            return res.send({
+        success: false,
+    message: "Password is incorrect"})
+
+    return res.send({success: true, message: "Logged in successfully"})
+    }
+    catch(err)
+    {
+        console.log("Error",err)
+        return res.status(500).json({message: "Something went wrong"})
+    }
+})
 module.exports=userRouter;
