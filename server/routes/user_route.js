@@ -44,22 +44,26 @@ userRouter.post("/register", async(req,res)=>
 userRouter.post("/login",async(req,res)=>
 {
     try{
-        const user= await User.findOne(req.body.email)
+        const user= await User.findOne({email: req.body.email})
         if(!user)
         {
-            return res.send(
+            return res.status(401).send(
                 {
                     success: false,
                     message: "User does not exist. Please register"
                 }
             )
         }
-        if(user.password !==req.body.password)
-            return res.send({
-        success: false,
-    message: "Password is incorrect"})
 
-    return res.send({success: true, message: "Logged in successfully"})
+        //RETURNS PROMISE
+        const isvalidpassword=await bcrypt.compare(req.body.password,user.password)
+        console.log(isvalidpassword, ` ${user.password}`)
+        if(!isvalidpassword)
+            return res.status(401).send({
+             success: false,
+             message: "Password is incorrect"})
+
+    return res.status(200).send({success: true, message: "Logged in successfully"})
     }
     catch(err)
     {
