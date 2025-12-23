@@ -2,18 +2,22 @@ import React from 'react';
 import { Button, Checkbox, Form, Input, message } from 'antd';
 import {login} from '../backend/auth'
 import { Link, useNavigate } from "react-router-dom";
+import { setUserData } from '../redux/userSlice'
+import { useDispatch } from "react-redux";
 
 function Login()
 {
-const navigate= useNavigate();
-const onSubmit= async(values)=>
+  const dispatch= useDispatch();
+  const navigate= useNavigate();
+  const onSubmit= async(values)=>
     {
          try {
             const userData = await login(values)
             console.log("Login success:", userData)
             if(userData.success)
              {
-               message.success(userData.message)
+              message.success(userData.message)
+              dispatch(setUserData(userData.user))
               navigate("/home")
               }
              else
@@ -32,42 +36,62 @@ const onSubmit= async(values)=>
   console.log('Failed:', errorInfo);
 };*/
 return<>
-  <Form
-    name="basic"
-    labelCol={{ span: 8 }}
-    wrapperCol={{ span: 16 }}
-    style={{ maxWidth: 600 }}
-    initialValues={{ remember: true }}
-    onFinish={onSubmit}
-    //onFinishFailed={onFinishFailed}
-    autoComplete="off"
-  >
-    <Form.Item
-      label="Email"
-      name="email"
-      rules={[{ required: true, message: 'Please input your username!' }]}
-    >
-      <Input />
-    </Form.Item>
+  <header className="App-header">
+        <main className="main-area mw-500 text-center px-3">
+          <section className="left-section">
+            <h1>Login to BookMyShow</h1>
+          </section>
 
-    <Form.Item
-      label="Password"
-      name="password"
-      rules={[{ required: true, message: 'Please input your password!' }]}
-    >
-      <Input.Password />
-    </Form.Item>
+          <section className="right-section">
+            <Form layout="vertical" onFinish={onSubmit}>
+              <Form.Item
+                label="Email"
+                htmlFor="email"
+                name="email"
+                className="d-block"
+                rules={[{ required: true, message: "Email is required" }]}
+              >
+                <Input
+                  id="email"
+                  type="text"
+                  placeholder="Enter your Email"
+                ></Input>
+              </Form.Item>
 
-    <Form.Item name="remember" valuePropName="checked" label={null}>
-      <Checkbox>Remember me</Checkbox>
-    </Form.Item>
+              <Form.Item
+                label="Password"
+                htmlFor="password"
+                name="password"
+                className="d-block"
+                rules={[{ required: true, message: "Password is required" }]}
+              >
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your Password"
+                ></Input>
+              </Form.Item>
 
-    <Form.Item label={null}>
-      <Button type="primary" htmlType="submit">
-        Submit
-      </Button>
-    </Form.Item>
-  </Form>
-  </>
+              <Form.Item className="d-block">
+                <Button
+                  type="primary"
+                  block
+                  htmlType="submit"
+                  style={{ fontSize: "1rem", fontWeight: "600" }}
+                >
+                  Login
+                </Button>
+              </Form.Item>
+            </Form>
+            <div>
+              <p>
+                New User? <Link to="/register">Register Here</Link>
+              </p>
+            </div>
+          </section>
+        </main>
+      </header>
+    </>
 }
+
 export default Login;

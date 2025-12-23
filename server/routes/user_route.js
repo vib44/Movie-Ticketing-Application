@@ -5,6 +5,8 @@ const User=require("../models/user_models.js")
 const userRouter= express.Router();// router form exprrss
 const jwt= require("jsonwebtoken")
 
+const isAuth = require("../middlewares/authMiddleware.js")
+
 //register API
 
 userRouter.post("/register", async(req,res)=>
@@ -65,17 +67,43 @@ userRouter.post("/login",async(req,res)=>
              message: "Password is incorrect"})
     
     const token= jwt.sign({userId: user._id},process.env.JWT_SECRET,
-        {expiresIn:"7d"})         
+        {expiresIn:"7d"}) 
+        
+    res.cookie("jwtToken",token,{httpOnly: true})    
     
     return res.status(200).send(
         {success: true,
          message: "Logged in successfully",
-         token: token})
+         token: token,
+         user: user})
     }
     catch(err)
     {
         console.log("Error",err)
         return res.status(500).json({message: "Something went wrong"})
     }
+    
 })
+
+userRouter.get("/current-user",isAuth,async(req,res)=>
+    {
+        const userId=req.userId;
+        if(!userId)
+        {
+            return res.send(401).json({
+                message: "Not authorized. No valid token"
+            })
+        }
+        try
+        {
+            const verifiedUser= await User.findById(userId).select("-password")
+            console.log(verifiedUser)   
+            res.json(verifiedUser) 
+        }  
+        catch(error)
+    {
+        console.log("Error",error)
+        res.status(500).json({message: "Something went wrong"})
+    }  });
+
 module.exports=userRouter;
