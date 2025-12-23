@@ -3,6 +3,7 @@ const bcrypt=require("bcrypt");
 const User=require("../models/user_models.js")
 
 const userRouter= express.Router();// router form exprrss
+const jwt= require("jsonwebtoken")
 
 //register API
 
@@ -62,8 +63,14 @@ userRouter.post("/login",async(req,res)=>
             return res.status(401).send({
              success: false,
              message: "Password is incorrect"})
-
-    return res.status(200).send({success: true, message: "Logged in successfully"})
+    
+    const token= jwt.sign({userId: user._id},process.env.JWT_SECRET,
+        {expiresIn:"7d"})         
+    
+    return res.status(200).send(
+        {success: true,
+         message: "Logged in successfully",
+         token: token})
     }
     catch(err)
     {
