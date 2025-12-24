@@ -8,9 +8,9 @@ dotEnv.config();
 dbConfig.connectDb()
 
 const userRoutes=require("./routes/user_route.js")
+const movieRoutes= require("./routes/movie_route.js")
 
 app.use(express.json())
-
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -18,7 +18,7 @@ app.use(cors({
 
 app.use(cookieParser())
 app.use("/api/auth",userRoutes)
-
+app.use("/api/movie",movieRoutes)
 
 app.listen(8001,()=>
 {
