@@ -1,9 +1,8 @@
 import React from "react";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Layout, Input, Button, Avatar, Space } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-
 import { getCurrentUser } from "../backend/auth";
 import { setUserData } from "../redux/userSlice";
 
@@ -31,6 +30,7 @@ const NavBar = ({ user, onLogout }) => {
   useEffect(() => {
     getUserData();
   }, []);
+
 
 return (
 <Header
