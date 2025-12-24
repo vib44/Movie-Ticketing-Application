@@ -5,7 +5,7 @@ import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { getCurrentUser } from "../backend/auth";
 import { setUserData } from "../redux/userSlice";
-
+import {Link} from "react-router-dom"
 const { Header } = Layout;
 
 const NavBar = ({ user, onLogout }) => {
@@ -64,9 +64,8 @@ return (
       {/* User + Logout */}
       <Space size="large" align="center">
         <Avatar icon={<UserOutlined />} />
-        <span style={{ fontWeight: 500 }}>{user?.name}</span>
-        <span style={{ fontWeight: 500 }}>{userData?.name}</span>
-
+        <Link to={'/admin'}>{userData?.name}</Link>
+        
         <Button
           type="primary"
           danger
