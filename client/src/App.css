@@ -612,7 +612,8 @@ hr{
     margin-right: 0;
     margin-bottom: 1rem;
   }
-  .d-flex{
-    display: flex;
-  }
+}
+
+.d-flex {
+  display: flex;
 }

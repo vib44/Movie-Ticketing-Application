@@ -3,9 +3,11 @@ import {Table, Button} from "antd"
 import {useEffect, useState} from "react"
 import {getAllMovies} from "../../backend/movie";
 import moment from "moment";
+import MovieForm from "./MovieForm"
 
 const MovieList = () => {
     const[movies,setMovies]=useState([])
+    const[isModalOpen, setIsModalOpen]= useState(false)
     const getMovies= async()=>
     {
         try{
@@ -69,9 +71,12 @@ const MovieList = () => {
   return <>
   <div className="justify-content-end d-flex">
 
-        <Button type="primary">Add Movie</Button>
+        <Button type="primary" onClick={()=>{ setIsModalOpen(true)}} >Add Movie</Button>
     </div>
     <Table dataSource={movies} columns={tableHeadings}/> 
+    {isModalOpen? (
+      <MovieForm isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}/>)
+      : null}
   </>
 }
 export default MovieList
