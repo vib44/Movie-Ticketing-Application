@@ -12,7 +12,7 @@ export const getAllMovies= async()=>
         console.log(response);
         return response.data;
     } catch (error) {
-        
+        console.log("movie.js>getAllMovies error",error)
     }
 }
 
