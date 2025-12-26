@@ -7,12 +7,12 @@ function Admin() {
     const items = [
   {
     key: '1',
-    label: 'Tab 1',
+    label: 'Movies',
     children: <MovieList/>,
   },
   {
     key: '2',
-    label: 'Tab 2',
+    label: 'Theatres',
     children: <TheatreList/>,
   }
 ];

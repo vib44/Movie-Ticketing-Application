@@ -8,6 +8,8 @@ import NavBar from './components/Navbar'
 import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
 import Admin from "./pages/Admin/index"
+import Partner from "./pages/Partner"
+
 function App() {
   return (
     <>
@@ -18,6 +20,7 @@ function App() {
           <Route path="/login" element={<Login/>}/>
           <Route path="/register" element={<Register/>}/>
           <Route path="/admin" element={<Admin/>}/>
+          <Route path="/theatre" element={<Partner/>}/>  
             </Routes>
       </BrowserRouter>      
     </>
