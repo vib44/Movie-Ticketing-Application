@@ -10,7 +10,7 @@ const movieRouter= express.Router();
 movieRouter.post("/add",addMovies)
 
 //update
-movieRouter.put("/update/:id",updateMovie)
+movieRouter.put("/update",updateMovie)
 
 //delete
 movieRouter.delete("/delete/:id",deleteMovie)

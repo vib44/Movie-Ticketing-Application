@@ -25,13 +25,13 @@ const addMovies=async(req,res)=>
 const updateMovie=async(req,res)=>
 {
     try {
-        const movieId= req.params.id;
-        const movie= await Movie.findByIdAndUpdate(movieId, req.body)
+       // const movieId= req.params.id;
+        const movie= await Movie.findByIdAndUpdate(req.body.movieId, req.body)
        res.status(200).send(
             {
                 success: true,
                 message: "Movie Updated successfully",
-                movieId: movieId
+                movie: movie
             }
         )
     } catch (error) {
@@ -46,8 +46,8 @@ const updateMovie=async(req,res)=>
 const deleteMovie=async(req,res)=>
 {
     try {
-        const movieId= req.params.id;
-        const movie= await Movie.findByIdAndDelete(movieId)
+        //const movieId= req.params.id;
+        const movie= await Movie.findByIdAndDelete(req.body.movieId)
        res.send(
             {
                 success: true,
