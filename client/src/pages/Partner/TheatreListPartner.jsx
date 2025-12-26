@@ -5,7 +5,7 @@ import {useEffect, useState} from "react"
 import {getAllTheatres, deleteTheatre, getAllTheatresByOwner} from "../../backend/theatre";
 import {getCurrentUser} from "../../backend/auth";
 import TheatreForm from "./TheatreForm"
-import {useDispatch} from "react-redux"
+import {useDispatch, useSelector} from "react-redux"
 import { setUserData } from "../../redux/userSlice";
 
 const TheatreListPartner = () => {
@@ -13,7 +13,11 @@ const TheatreListPartner = () => {
     const[isModalOpen, setIsModalOpen]= useState(false)
     const [formType, setFormType]= useState("add")
     const [selectedTheatreData, setSelectedTheatreData]=useState(null)
+    const {userData}= useSelector((state)=>state.user)
     const dispatch= useDispatch();
+    const [isDeleteModalOpen,setIsDeleteModalOpen]=useState(false)
+    const [isShowmodalOpen,setIsShowModalOpen]=useState(false)
+    
     const getTheatres= async()=>
     {
         try{
@@ -77,13 +81,15 @@ const TheatreListPartner = () => {
             }}><EditOutlined /></Button>
 
           <Button onClick={()=>
-            {setIsModalOpen(false)
-            setFormType("delete")
+            {setIsDeleteModalOpen(true)
             setSelectedTheatreData(record)
-            deleteTheatre(selectedTheatreData)}}>
+            }}>
               <DeleteOutlined /></Button>
 
-              <Button><PlusOutlined/></Button>
+              <Button onClick={()=>
+            {setIsShowModalOpen(true)
+            setSelectedTheatreData(record)
+            }}><PlusOutlined/>Shows</Button>
         </div>
       )
     }
@@ -109,7 +115,7 @@ const getData=async(userId)=>
             message.error(response?.message||"Something went wrong fetching owner")
     }
          catch (error) {
-            message.error(esponse?.message||"Something went wrong fetching owner")
+            message.error(response?.message||"Something went wrong fetching owner")
     }
 }
 

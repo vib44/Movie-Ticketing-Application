@@ -55,7 +55,9 @@ const TheatreForm = ({isModalOpen, setIsModalOpen,
         if(response && response.success)
             {
                 message.success(response.message);
-                setIsModalOpen(false)
+                if(getData)
+                    getData();
+                setIsModalOpen(false) 
             }
         else
                 message.error(response.error)    
