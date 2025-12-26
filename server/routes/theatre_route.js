@@ -24,7 +24,7 @@ TheatreRouter.get('/:id',getTheatreById)
 
 //get all theatres by owners
 
-TheatreRouter.post("get-all-theatres-by-owners", async(req,res)=>
+TheatreRouter.post("/get-all-theatres-by-owners", async(req,res)=>
 {
     try {
         const response= await Theatre.find({owner: req.body.owner})

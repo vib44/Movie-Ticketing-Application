@@ -9,7 +9,7 @@ const addTheatres=async(req,res)=>
             {
                 success: true,
                 message: "New Theatre added",
-                Theatre: newTheatre
+                data: newTheatre
             }
         )
     } catch (error) {
@@ -24,13 +24,13 @@ const addTheatres=async(req,res)=>
 const updateTheatre=async(req,res)=>
 {
     try {
-       // const TheatreId= req.params.id;
-        const Theatre= await Theatre.findByIdAndUpdate(req.body.TheatreId, req.body)
-       res.status(200).send(
+       // const theatreId= req.params.id;
+       const theatreUpdated= await Theatre.findByIdAndUpdate(req.body.theatreId,req.body)
+       res.send(
             {
                 success: true,
                 message: "Theatre Updated successfully",
-                Theatre: Theatre
+                data: theatreUpdated
             }
         )
     } catch (error) {
@@ -45,13 +45,13 @@ const updateTheatre=async(req,res)=>
 const deleteTheatre=async(req,res)=>
 {
     try {
-        //const TheatreId= req.params.id;
-        const Theatre= await Theatre.findByIdAndDelete(req.body.TheatreId)
+        //const theatreId= req.params.id;
+        await Theatre.findByIdAndDelete(req.body.theatreId)
        res.send(
             {
                 success: true,
                 message: "Theatre Deleted successfully",
-                Theatre: Theatre
+              
             }
         )
     } catch (error) {
@@ -87,13 +87,13 @@ const getAllTheatres=async(req,res)=>
 const getTheatreById=async(req,res)=>
 {
     try {
-        const TheatreId= req.params.id;
-        const Theatre= await Theatre.findById(TheatreId, req.body)
+        
+        const theatre= await Theatre.findById(req.body.theatreId)
        res.status(200).send(
             {
                 success: true,
                 message: "Theatre fetched successfully",
-                Theatre: Theatre
+                theatre: theatre
             }
         )
     } catch (error) {

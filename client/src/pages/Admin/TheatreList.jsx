@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { getAllTheatres, updateTheatre } from "../../backend/theatre";
+import { getAllTheatresForAdmin   , updateTheatre } from "../../backend/theatre";
 import { message, Table, Button } from "antd";
 const TheatreList = () => {
   const [theatres, setTheatres] = useState([]);
@@ -8,7 +8,7 @@ const TheatreList = () => {
 
   const getData = async () => {
     try {
-      const response = await getAllTheatres();
+      const response = await getAllTheatresForAdmin();
       if (response.success) {
         const allTheatres = response.data;
         setTheatres(allTheatres);
@@ -91,6 +91,7 @@ const TheatreList = () => {
   ];
 
   const handleStatusChange = async (data) => {
+
     try {
       let updatedPayload = {
         ...data,
@@ -99,6 +100,7 @@ const TheatreList = () => {
       };
       const response = await updateTheatre(updatedPayload);
       getData();
+      console.log(response)
       if (response.success) {
         message.success(response.message);
       }

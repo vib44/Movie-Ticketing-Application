@@ -22,13 +22,13 @@ const theatreSchema=new mongoose.Schema(
         phone:
         {
             type:"String",
-            required:"true"
+            required:true
         },
         isActive:{type: Boolean,
-            required:true,
+            default:false,
         },
          
-    },{timestamp: true})
+    },{timestamps: true})
 
     const theatre=mongoose.model('theatre',theatreSchema)
 

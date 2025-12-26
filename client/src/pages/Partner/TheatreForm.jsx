@@ -1,39 +1,69 @@
-import React from 'react'
+import {useEffect} from 'react'
 import {message, Form, Button, Modal, Input, Select, Row, Col} from "antd"
-import { addTheatre, updateTheatre, deleteTheatre } from '../../backend/theatre'
-const TheatreForm = ({isModalOpen, setIsModalOpen, formType, setFormType,
+import { addTheatres, updateTheatre, deleteTheatre } from '../../backend/theatre'
+import { useSelector ,useDispatch} from 'react-redux'
+import { getCurrentUser } from '../../backend/auth'
+import { setUserData } from '../../redux/userSlice'
+
+const TheatreForm = ({isModalOpen, setIsModalOpen, 
+    formType, setFormType,getData,
     selectedTheatreData, setSelectedTheatreData}) => {
-    const handleClose=()=>
+    
+        const handleClose=()=>
     {
         setIsModalOpen(false)
     }
 
-    const onFinish=async (values)=>{
-        if(formType==="add")
-       { try {
-            const response= await addTheatre(values)
-            if(response.success)
-                    message.success(response.message);
-            else
-                message.error(response.error)    
+    const { userData } = useSelector((state)=> state.user)
+    const dispatch= useDispatch();
+    const getUserData=async()=>
+    {
+        try {
+            const user= await getCurrentUser();
+            dispatch(setUserData(user))
         } catch (error) {
-            message.error(error)
+            console.log("user data error",error)
         }
-    console.log(values);
-}
-else 
-{
-   try {
-            const response= await updateTheatre({...values,TheatreId : selectedTheatreData._id})
-            if(response.success)
-                    message.success(response.message);
+    }
+
+    useEffect(()=>{
+        getUserData()
+    },[])
+
+    const onFinish=async (values)=>
+        {
+    try
+    {    console.log(userData , formType)
+        if(!userData)
+             {
+                 message.error("No user found. Please login")
+                 return;
+             }
+        let response= null 
+        if(formType==="add")
+        {
+            values.owner=userData._id
+            console.log(values)
+            response= await addTheatres(values)
+        }
+
             else
+        {
+            values.theatreId=selectedTheatreData._id
+            response= await updateTheatre(values)
+        }
+        if(response && response.success)
+            {
+                message.success(response.message);
+                setIsModalOpen(false)
+            }
+        else
                 message.error(response.error)    
-        } catch (error) {
+        } 
+        catch (error) {
             message.error(error)
         }
     console.log(values); 
-}
 }
   return <>
    <Modal width={800} title="Basic Modal" closable={{ 'aria-label': 'Custom Close Button' }}
@@ -56,7 +86,7 @@ else
 
             
              <Col span={12}>            
-            <Form.Item label="Theatre Email in minutes" name="email"
+            <Form.Item label="Theatre Email" name="email"
              rules={[{requires: true, message: "Theatre Email is required"}]}>
             <Input id="email" placeholder='Enter Theatre Email' type="email"/>
             </Form.Item>
