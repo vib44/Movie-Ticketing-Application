@@ -82,7 +82,7 @@ const TheatreForm = ({isModalOpen, setIsModalOpen,
 
              <Col span={24}>
             <Form.Item label="Theatre Address" name="address" rules={[{requires: true, message: "Theatre name is required"}]}>
-            <Input id="address" placeholder='Enter Theatre description' type="text"/>
+            <Input id="address" placeholder='Enter Theatre address' type="text"/>
             </Form.Item>
             </Col>
 

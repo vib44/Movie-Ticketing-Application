@@ -7,6 +7,7 @@ import {getCurrentUser} from "../../backend/auth";
 import TheatreForm from "./TheatreForm"
 import {useDispatch, useSelector} from "react-redux"
 import { setUserData } from "../../redux/userSlice";
+import ShowModal from './showModal';
 
 const TheatreListPartner = () => {
     const[theatres,setTheatres]=useState(null)
@@ -16,7 +17,7 @@ const TheatreListPartner = () => {
     const {userData}= useSelector((state)=>state.user)
     const dispatch= useDispatch();
     const [isDeleteModalOpen,setIsDeleteModalOpen]=useState(false)
-    const [isShowmodalOpen,setIsShowModalOpen]=useState(false)
+    const [isShowModalOpen,setIsShowModalOpen]=useState(false)
     
     const getTheatres= async()=>
     {
@@ -131,20 +132,27 @@ useEffect(()=>{
     })()
 },[])
   return <>
-  <div className="justify-content-end d-flex">
+  <div >
 
         <Button type="primary" onClick={()=>{ 
           setIsModalOpen(true)
           setSelectedTheatreData(null)
           setFormType("add")} } >Add Theatre</Button>
-    </div>
+    
     <Table dataSource={theatres} columns={tableHeadings}/> 
+    
     {isModalOpen? (
       <TheatreForm isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}
       selectedTheatreData={selectedTheatreData} formType={formType}
       setSelectedTheatreData={setSelectedTheatreData} setFormType={setFormType}
       getData={getData}/>)
       : null}
+
+      {isShowModalOpen? <ShowModal isModalOpen={isShowModalOpen} 
+      setIsModalOpen={setIsShowModalOpen}
+      selectedTheatreData={selectedTheatreData}
+      setSelectedTheatreData={setSelectedTheatreData}/> : null}
+  </div>
   </>
 }
 export default TheatreListPartner
