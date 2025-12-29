@@ -44,10 +44,10 @@ ShowRouter.post("/get-all-shows-by-owners", async(req,res)=>
 
 //get all shows for a partner
 
-ShowRouter.get("/get-all-shows",async(req,res)=>
+ShowRouter.post("/get-all-shows",async(req,res)=>
 {
     try {
-        const allShows=await Show.find({}).populate(movie);
+        const allShows=await Show.find({}).populate("movie");
         res.send({
             success: true,
             message: "All shows fetched successfully",

@@ -1,5 +1,5 @@
 import React from 'react'
-import {Modal, Table, message,Button, Form, Row , Col, Input} from "antd"
+import {Select,Modal, Table, message,Button, Form, Row , Col, Input} from "antd"
 import {useState, useEffect} from "react"
 import { getAllTheatresByOwner } from '../../backend/theatre'
 import { getAllMovies } from '../../backend/movie'
@@ -55,7 +55,10 @@ const ShowModal = ({isModalOpen,
             const response= await addShows(values)
             console.log(response)
             if(response.success)
-              message.success(response.success)
+             { 
+                message.success(response.success)
+                getData()
+             }
             else
                message.error("Cannot show details.Please try again")
             
@@ -93,7 +96,7 @@ key: "totalSeats"
 {
 title: "Movie",
 dataIndex: "movie",
-render: (record,value)=>
+render: (value,record)=>
 {
     return record.movie.title;
 }
@@ -111,8 +114,9 @@ key: "theatre"
             "Add show" : "Edit show"}
         </h3>
         {view==="table"?(
-            <><Button onClick={()=>{setView("form")}}>Add show</Button>
-                <Table columns={tableHeadings} />
+            <>
+            <Button onClick={()=>{setView("form")}}>Add show</Button>
+                <Table columns={tableHeadings} dataSource={shows}/>
         </>) : null}
 
         {view==="form"?(
@@ -144,7 +148,7 @@ key: "theatre"
              <Col span={8}>            
             <Form.Item label="Movie Name" name="movie">
             <Select id="movie" placeholder='Enter movie name' 
-            style={{width:"100v" , height: "45px"}} 
+            style={{width:"100%" , height: "45px"}} 
             options={movies.map((movie)=>({
                 key: movie._id,
                 label: movie.title,
@@ -170,13 +174,15 @@ key: "theatre"
 
         <Form.Item>
 
-            <Button block htmlType='submit'
+            <Button block onClick={()=>{setView("table")}}
             style={{fontSize: "1rem" , fontWeight: "600"}}>
+                
                 <ArrowLeftOutlined/>Go Back
+                
             </Button>
 
             <Button className="mt-3" block htmlType="submit" type="primary">
-                {view==="form"? "Add show": "Edit show"}
+                {view==="form"? "Add show": "Edit show"} 
             </Button>
         </Form.Item>
         </Form>

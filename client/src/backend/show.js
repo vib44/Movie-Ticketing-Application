@@ -20,12 +20,14 @@ export const addShows= async(payload)=>
 
 //get shows
 
-export const getShows= async()=>
+export const getShows= async(payload)=>
 {
     try {
-        const response= await api.get("/api/show/get-all-shows")
+        const response= await api.post("/api/show/get-all-shows",payload)
+        console.log(response)
         return response.data;
     } catch (error) {
+        console.log("getShows error show.js",error)
         return error.message      
     }
 }
