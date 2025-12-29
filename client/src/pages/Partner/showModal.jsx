@@ -57,7 +57,7 @@ const ShowModal = ({isModalOpen,
             if(response.success)
              { 
                 message.success(response.message)
-                //getData()
+                getData()
                 setView("table")
              }
             else
