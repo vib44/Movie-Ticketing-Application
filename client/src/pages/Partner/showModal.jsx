@@ -4,6 +4,7 @@ import {useState, useEffect} from "react"
 import { getAllTheatresByOwner } from '../../backend/theatre'
 import { getAllMovies } from '../../backend/movie'
 import { ArrowLeftOutlined} from "@ant-design/icons"
+import { getShows, addShows } from '../../backend/show'
 
 const ShowModal = ({isModalOpen,
   setIsModalOpen,
@@ -14,6 +15,7 @@ const ShowModal = ({isModalOpen,
     const[shows,setShows]=useState([])
     const[view,setView]=useState("table")
     
+    //get data for all movies
     const getData= async()=>
     {
         try {
@@ -22,10 +24,19 @@ const ShowModal = ({isModalOpen,
                 setMovies(allMovies.data) 
             else
                 message.error(allMovies.error)
-        } catch (error) {
+            
+            const allShowsResponse = await getShows()
+            setShows(allShowsResponse.data)
+            if(allShowsResponse.success)
+                console.log(allShowsResponse)
+            else
+                console.log("error in shows")
+        } 
+        
+        catch (error)
+         {
             message.error(error.message)
         }
-
     }
 
     useEffect(()=>
@@ -38,9 +49,21 @@ const ShowModal = ({isModalOpen,
         setIsModalOpen(false)
     }
 
-    const onFinish=()=>
+    const onFinish=async(values)=>
     {
-
+        try {
+            const response= await addShows(values)
+            console.log(response)
+            if(response.success)
+              message.success(response.success)
+            else
+               message.error("Cannot show details.Please try again")
+            
+        } 
+        catch (error) {
+         console.log("Add shows error",error)
+         message.error("Cannot add show, please try again later")   
+        }
     }
 const tableHeadings=[
 {
@@ -68,9 +91,12 @@ dataIndex: "totalSeats",
 key: "totalSeats"
 },
 {
-title: "movie",
+title: "Movie",
 dataIndex: "movie",
-key: "movie"
+render: (record,value)=>
+{
+    return record.movie.title;
+}
 },
 {
 title: "Theatre",
@@ -117,7 +143,14 @@ key: "theatre"
 
              <Col span={8}>            
             <Form.Item label="Movie Name" name="movie">
-            <Input id="movie" placeholder='Enter movie name' type="text"/>
+            <Select id="movie" placeholder='Enter movie name' 
+            style={{width:"100v" , height: "45px"}} 
+            options={movies.map((movie)=>({
+                key: movie._id,
+                label: movie.title,
+                value: movie._id}))
+            }
+                />
             </Form.Item>
             </Col>
 

@@ -21,7 +21,7 @@ const showSchema=new mongoose.Schema(
             required:true
         },
         bookedSeats:{type: Array,
-            required:true,
+            required:false,
         },
          ticketPrice:
         {
@@ -31,14 +31,14 @@ const showSchema=new mongoose.Schema(
          movie:
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref: "movies",
+            ref: "movie",
             required:true
         },
          theatre:
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref: "theatres",
-            required:true
+            ref: "theatre",
+            required:false
         },
          
     },{timestamps: true})

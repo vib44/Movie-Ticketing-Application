@@ -132,7 +132,7 @@ useEffect(()=>{
     })()
 },[])
   return <>
-  <div >
+  <div>
 
         <Button type="primary" onClick={()=>{ 
           setIsModalOpen(true)

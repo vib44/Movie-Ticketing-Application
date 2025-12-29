@@ -1,7 +1,7 @@
 const express= require("express")
-const Show = require("../models/Show_models")
+const Show = require("../models/show_models")
 const { addShows, updateShow, deleteShow,
-     getAllShows, getShowById}= require("../controllers/Show_controllers")
+     getAllShows, getShowById}= require("../controllers/show_controllers")
 
 
 const ShowRouter= express.Router();
@@ -38,6 +38,25 @@ ShowRouter.post("/get-all-shows-by-owners", async(req,res)=>
         res.send({
             success:false,
             message: "Something went wront. Unable to fetch Shows",
+        })
+    }
+})
+
+//get all shows for a partner
+
+ShowRouter.get("/get-all-shows",async(req,res)=>
+{
+    try {
+        const allShows=await Show.find({}).populate(movie);
+        res.send({
+            success: true,
+            message: "All shows fetched successfully",
+            data: allShows
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: `Not able to fetch shows ${error}`
         })
     }
 })

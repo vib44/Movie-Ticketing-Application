@@ -4,8 +4,8 @@ const addShows=async(req,res)=>
     try {
         const newShow= new Show(req.body);
         await newShow.save()
-
-        res.status(200).send(
+        console.log(newShow)
+        res.send(
             {
                 success: true,
                 message: "New Show added",
@@ -13,10 +13,10 @@ const addShows=async(req,res)=>
             }
         )
     } catch (error) {
-        res.status(500).send(
+        res.send(
             {
                 success: false,
-                message: "Failed to add Show",
+                message: error.message,
             })
     }
 }

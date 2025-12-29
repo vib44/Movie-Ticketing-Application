@@ -17,3 +17,15 @@ export const addShows= async(payload)=>
     }
 
 }
+
+//get shows
+
+export const getShows= async()=>
+{
+    try {
+        const response= await api.get("/api/show/get-all-shows")
+        return response.data;
+    } catch (error) {
+        return error.message      
+    }
+}
