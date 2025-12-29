@@ -94,7 +94,7 @@ const getMovieById=async(req,res)=>
             {
                 success: true,
                 message: "Movie fetched successfully",
-                movie: movie
+                data: movie
             }
         )
     } catch (error) {

@@ -3,7 +3,7 @@ import { Card ,Tag, Typography} from 'antd';
 const { Meta } = Card;
 const { Text } = Typography;
 const MovieCard = (props) => {
-    const { title,rating,genre,language,posterPath}= props;
+    const { title,rating,genre,language,posterPath, onClick}= props;
   
   return (
   <Card
@@ -16,6 +16,7 @@ const MovieCard = (props) => {
         src={posterPath}
       />
     }
+    onClick={onClick}
   >
     <Meta title={title}/>
     <div>

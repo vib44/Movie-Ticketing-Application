@@ -47,3 +47,16 @@ export const deleteMovie= async(obj)=>
     }
     
 } 
+
+export const getSingleMovie= async(id)=>
+{
+    try{
+        const response= await api.get(`/api/movie/${id}`)
+        console.log(response)
+        return response.data
+    }
+    catch(error)
+    {
+        console.log("Error occured getting movie", error)
+    }
+}
