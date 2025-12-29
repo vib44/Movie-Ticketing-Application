@@ -87,10 +87,12 @@ const TheatreListPartner = () => {
             }}>
               <DeleteOutlined /></Button>
 
-              <Button onClick={()=>
+              <Button 
+              onClick={()=>
             {setIsShowModalOpen(true)
-            setSelectedTheatreData(record)
-            }}><PlusOutlined/>Shows</Button>
+            setSelectedTheatreData(record) }}
+           >
+              <PlusOutlined/>Shows</Button>
         </div>
       )
     }
@@ -151,7 +153,8 @@ useEffect(()=>{
       {isShowModalOpen? <ShowModal isModalOpen={isShowModalOpen} 
       setIsModalOpen={setIsShowModalOpen}
       selectedTheatreData={selectedTheatreData}
-      setSelectedTheatreData={setSelectedTheatreData}/> : null}
+      setSelectedTheatreData={setSelectedTheatreData}
+      /> : null}
   </div>
   </>
 }

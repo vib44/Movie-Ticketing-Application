@@ -47,7 +47,8 @@ ShowRouter.post("/get-all-shows-by-owners", async(req,res)=>
 ShowRouter.post("/get-all-shows",async(req,res)=>
 {
     try {
-        const allShows=await Show.find({}).populate("movie");
+        const allShows=await Show.find({theatre: req.body.theatreId})
+        .populate("movie").populate("theatre");
         res.send({
             success: true,
             message: "All shows fetched successfully",

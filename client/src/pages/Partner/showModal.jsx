@@ -8,8 +8,8 @@ import { getShows, addShows } from '../../backend/show'
 
 const ShowModal = ({isModalOpen,
   setIsModalOpen,
-  selectedTheatre,
-  setSelectedtheatre}) => {
+  selectedTheatreData,
+  setSelectedTheatreData}) => {
 
     const[movies,setMovies]=useState([])
     const[shows,setShows]=useState([])
@@ -25,7 +25,7 @@ const ShowModal = ({isModalOpen,
             else
                 message.error(allMovies.error)
             
-            const allShowsResponse = await getShows()
+            const allShowsResponse = await getShows({theatreId: selectedTheatreData._id})
             setShows(allShowsResponse.data)
             if(allShowsResponse.success)
                 console.log(allShowsResponse)
@@ -52,12 +52,13 @@ const ShowModal = ({isModalOpen,
     const onFinish=async(values)=>
     {
         try {
-            const response= await addShows(values)
+            const response= await addShows({...values,theatre: selectedTheatreData._id})
             console.log(response)
             if(response.success)
              { 
-                message.success(response.success)
-                getData()
+                message.success(response.message)
+                //getData()
+                setView("table")
              }
             else
                message.error("Cannot show details.Please try again")
@@ -104,7 +105,10 @@ render: (value,record)=>
 {
 title: "Theatre",
 dataIndex: "theatre",
-key: "theatre"
+render: (value,record)=>
+{
+    return record?.theatre?.name || "NA";
+}
 },
 ]
   return (
@@ -178,7 +182,7 @@ key: "theatre"
             style={{fontSize: "1rem" , fontWeight: "600"}}>
                 
                 <ArrowLeftOutlined/>Go Back
-                
+
             </Button>
 
             <Button className="mt-3" block htmlType="submit" type="primary">
