@@ -1,14 +1,19 @@
 import {useState, useEffect} from 'react'
-import {useParams} from 'react-router-dom'
+import {useParams , useNavigate} from 'react-router-dom'
 import { getSingleMovie } from '../../backend/movie';
-import {Button,Rate, Card, Row, Col, Image, Typography, Tag} from 'antd'
+import {Button,Rate, Card, Row, Col, Image, Typography, Tag, Input} from 'antd'
 import moment from 'moment'
+import { getAllTheatresAndShows } from '../../backend/show';
+
 const {Title}= Typography
 
 const SingleMovie = () => {
-    
+  
+  const navigate = useNavigate();
   const [movie, setMovie]= useState(null)
+  const [date, setDate]= useState(moment().format("YYYY-MM-DD"))
   const {id}= useParams();
+  const[theatres,setTheatres]=useState([])
   console.log("movieId",id)
   
 useEffect(()=>{
@@ -24,7 +29,27 @@ const fetchMovie= async()=>{
     }
 if(id) fetchMovie();
 },[id])
-  
+ 
+useEffect(()=>{
+    const fetchAllTheatresAndShows= async()=>
+    {
+        try {
+            const res=await getAllTheatresAndShows({movie: id,date: date})
+            setTheatres(res.data)
+        } 
+        catch (error) {
+            console.log("Error showing theatres for movie shows", error)
+        }
+    }
+    fetchAllTheatresAndShows();
+},[date])
+
+const handleDateChange=(ev)=>{
+    const dateSelected= ev.target.value
+    console.log(dateSelected)
+    setDate(dateSelected)
+    navigate(`/singleMovie/${id}?date=${dateSelected}`)
+}
 if(!movie)
         return <div>Loading....</div>;
 
@@ -63,11 +88,18 @@ return <>
               <div style={{marginTop: 16}}>
                 <Button type="primary">Book Tickets</Button>
              </div>
+             <div className="d-flex">
+                <label>Choose date:</label>
+                <Input type="date" value={date} onChange={handleDateChange}/>
+             </div>
             </Col>
 
 
         </Row>
     </Card>
+
+    
+
 </div>
   </>
 }

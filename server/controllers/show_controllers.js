@@ -68,7 +68,7 @@ const getAllShows=async(req,res)=>
 {
     try {
         const {movie, date}=req.body
-        const allShows= await Show.find({movie, date});
+        const allShows= await Show.find({movie, date}).populate("theatre").populate("movie");
         
        res.send(
             {

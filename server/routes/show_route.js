@@ -17,7 +17,7 @@ ShowRouter.put("/update",updateShow)
 ShowRouter.delete("/delete/:id",deleteShow)
 
 //get all Shows
-ShowRouter.get("/get-all-theatres-by-movie",getAllShows)
+ShowRouter.post("/get-all-theatres-by-movie",getAllShows)
 
 //get Show by id
 ShowRouter.get('/get-show-by-id',getShowById)

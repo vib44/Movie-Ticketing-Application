@@ -5,6 +5,7 @@ import { getAllTheatresByOwner } from '../../backend/theatre'
 import { getAllMovies } from '../../backend/movie'
 import { ArrowLeftOutlined} from "@ant-design/icons"
 import { getShows, addShows } from '../../backend/show'
+import moment from 'moment'
 
 const ShowModal = ({isModalOpen,
   setIsModalOpen,
@@ -78,7 +79,11 @@ key: "name"
 {
 title: "Show Date",
 dataIndex: "date",
-key: "date"
+key: "date",
+render: (value,record)=>
+{
+    return moment(record.date).format("DD-MM-YYYY")
+}
 },
 {
 title: "Show Time",
