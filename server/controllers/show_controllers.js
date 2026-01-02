@@ -70,11 +70,28 @@ const getAllShows=async(req,res)=>
         const {movie, date}=req.body
         const allShows= await Show.find({movie, date}).populate("theatre").populate("movie");
         
+        console.log("allshows",allShows)
+       //map shows with unique theatres
+        let uniqueTheatres=[]
+        allShows.forEach((show)=>{
+            let isTheatre= uniqueTheatres.find((theatre)=>
+            theatre._id===show.theatre._id)
+
+        if(!isTheatre)
+        {
+            let showsofThisTheatre= allShows.filter((showObj)=>
+                showObj.theatre._id==show.theatre._id
+            )
+            uniqueTheatres.push({
+                ...show.theatre._doc,
+                shows: showsofThisTheatre
+            })
+        } })
        res.send(
             {
                 success: true,
                 message: "Shows fetched successfully",
-                data: allShows
+                data: uniqueTheatres
             }
         )
     } catch (error) {
@@ -89,9 +106,9 @@ const getAllShows=async(req,res)=>
 const getShowById=async(req,res)=>
 {
     try {
-        
-        const show= await Show.findById(req.body.showId)
-       res.status(200).send(
+        console.log(req)
+        const show= await Show.findById(req.params.id,req.body).populate("theatre")
+       res.send(
             {
                 success: true,
                 message: "Show fetched successfully",

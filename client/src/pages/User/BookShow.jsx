@@ -1,36 +1,45 @@
+//total seats layout- gray out booked seats, show available the rest
+//on click on available seats- book the seat.
+
 import {useState, useEffect} from 'react'
 import {useParams , useNavigate} from 'react-router-dom'
 import { getSingleMovie } from '../../backend/movie';
 import {Button,Rate, Card, Row, Col, Image, Typography, Tag, Input} from 'antd'
 import moment from 'moment'
-import { getAllTheatresAndShows, getShow } from '../../backend/show';
+import { getAllTheatresAndShows,getShow } from '../../backend/show';
 
 const {Title}= Typography
 
-const SingleMovie = () => {
+const BookShow = () => {
   
   const navigate = useNavigate();
-  const [movie, setMovie]= useState(null)
+  const [show, setShow]= useState(null)
   const [date, setDate]= useState(moment().format("YYYY-MM-DD"))
   const {id}= useParams();
   const[theatres,setTheatres]=useState([])
-  console.log("movieId",id)
+  console.log("Show id",id)
   
 useEffect(()=>{
-const fetchMovie= async()=>{
+const fetchShow= async()=>{
     try {
-        const res= await getSingleMovie(id)
-        setMovie(res.data)
+        const res= await getShow(id)
+        setShow(res.data)
         console.log("res.data",res.data)
-        console.log("Movie setMovie",movie)
+        console.log("Show is",show)
     } catch (error) {
-        console.log("Error getting movie",error)
+        console.log("Error getting show",error)
     }
     }
-if(id) fetchMovie();
+if(id) fetchShow();
 },[id])
+
+const getSeats=()=>{
+    let cols=10;
+    const totalSeats=show?.totalSeats;
+    let rows= Math.ceil(totalSeats/cols)
+}
  
-useEffect(()=>{
+/*useEffect(()=>{
     const fetchAllTheatresAndShows= async()=>
     {
         try {
@@ -124,8 +133,7 @@ return (
         })
     ): null}
 </div>
-)}
-
-
-
-export default SingleMovie
+)}*/
+return <div>Book SHow</div>
+}
+export default BookShow

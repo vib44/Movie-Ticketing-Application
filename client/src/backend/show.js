@@ -42,3 +42,13 @@ export const getAllTheatresAndShows= async payload=>
         return error.message;
     }
 }
+
+export const getShow= async(payload)=>
+{
+    try {
+        const response= await api.post(`/api/show/get-show-by-id`,payload)
+        return response.data
+    } catch (error) {
+        console.log("get show by id error:",error)
+    }
+}

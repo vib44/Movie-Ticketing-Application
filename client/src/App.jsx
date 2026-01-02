@@ -10,6 +10,7 @@ import PublicRoute from "./components/PublicRoute"
 import Admin from "./pages/Admin/index"
 import Partner from "./pages/Partner"
 import SingleMovie from './pages/User/SingleMovie'
+import BookShow from './pages/User/BookShow'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/admin" element={<Admin/>}/>
           <Route path="/theatre" element={<Partner/>}/>  
           <Route path="/singleMovie/:id" element={<SingleMovie/>}/>
+          <Route path="/bookshow/:id" element={<BookShow/>}/>    
             </Routes>
       </BrowserRouter>      
     </>
