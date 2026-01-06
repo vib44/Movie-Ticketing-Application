@@ -106,12 +106,14 @@ const getAllShows=async(req,res)=>
 const getShowById=async(req,res)=>
 {
     try {
-        console.log(req)
-        const show= await Show.findById(req.params.id,req.body).populate("theatre")
+        
+        const show= await Show.findById(req.body.id)
+        .populate("theatre")
+        .populate("movie")
        res.send(
             {
                 success: true,
-                message: "Show fetched successfully",
+                message: `Show fetched successfully`,
                 data: show
             }
         )

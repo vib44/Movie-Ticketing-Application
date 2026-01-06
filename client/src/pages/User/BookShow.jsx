@@ -4,25 +4,27 @@
 import {useState, useEffect} from 'react'
 import {useParams , useNavigate} from 'react-router-dom'
 import { getSingleMovie } from '../../backend/movie';
-import {Button,Rate, Card, Row, Col, Image, Typography, Tag, Input} from 'antd'
+import {Button,Divider, Space,Card, Row, Col, Image, Typography, Tag, Input, message} from 'antd'
 import moment from 'moment'
 import { getAllTheatresAndShows,getShow } from '../../backend/show';
 
-const {Title}= Typography
+const {Title, Text}= Typography
 
 const BookShow = () => {
   
+  const COLUMNS=10;
   const navigate = useNavigate();
   const [show, setShow]= useState(null)
-  const [date, setDate]= useState(moment().format("YYYY-MM-DD"))
+  const [selectedSeats, setSelectedSeats]= useState([])
   const {id}= useParams();
-  const[theatres,setTheatres]=useState([])
+  const[loading,setLoading]=useState(false)
+  const[totalPrice, setTotalPrice]=useState(0)
   console.log("Show id",id)
   
 useEffect(()=>{
 const fetchShow= async()=>{
     try {
-        const res= await getShow(id)
+        const res= await getShow({id:id})
         setShow(res.data)
         console.log("res.data",res.data)
         console.log("Show is",show)
@@ -38,102 +40,177 @@ const getSeats=()=>{
     const totalSeats=show?.totalSeats;
     let rows= Math.ceil(totalSeats/cols)
 }
- 
-/*useEffect(()=>{
-    const fetchAllTheatresAndShows= async()=>
+
+const handleSeatClick=(seatNumber)=>
+{
+    console.log(seatNumber)
+    if(isSeatBooked(seatNumber)) return;
+    
+    //de-select
+    if(isSeatSelected(seatNumber))
     {
-        try {
-            const res=await getAllTheatresAndShows({movie: id,date: date})
-            setTheatres(res.data)
-        } 
-        catch (error) {
-            console.log("Error showing theatres for movie shows", error)
-        }
+        setSelectedSeats(selectedSeats.filter((seat)=> seat!==seatNumber))
     }
-    fetchAllTheatresAndShows();
-},[date])
 
-const handleDateChange=(ev)=>{
-    const dateSelected= ev.target.value
-    console.log(dateSelected)
-    setDate(dateSelected)
-    navigate(`/singleMovie/${id}?date=${dateSelected}`)
+    //select
+    else
+    {
+        setSelectedSeats(selectedSeats=>[...selectedSeats,seatNumber])
+    }
+
+    setTotalPrice(totalPrice=>selectedSeats.length*show?.ticketPrice)
 }
-if(!movie)
-        return <div>Loading....</div>;
+ 
+const isSeatBooked=(seatNumber)=>{
 
-return (
-<div>
-    <Card>
-        <Row gutter={16}> 
-            <Col xs={24} sm={16}>
-            <Image src={movie.posterPath} alt={movie.title}
-             style={{width: "100%", borderRadius: 8 , height: "500px"}}/>
-            </Col>
-            
-            <Col xs={24} sm={16}>
-            <Title level={4}>{movie.title}</Title>
-            </Col>
+    return show?.bookedSeats?.includes(seatNumber) || false
 
-             <Col xs={24} sm={16}>
-             <Tag style={{marginBottom : 4}}>{movie.genre}</Tag>
-            
-             <span style ={{marginLeft: 8}}>
-                {movie.rating? <Rate allowHalf count={10} disabled value={movie.rating}/>  : null}
-            
-             </span>
+}
 
-             <p style={{marginBottom: 12}}>{movie.description}</p>
-             <strong >Release Date:</strong>
-             <span> {moment(movie.releaseDate).format("DD-MM-YYYY")}</span>
-             <div>
-                <strong> Movie Language: </strong>
-                <span>{movie.language}</span>
-             </div>
-              <div>
-                <strong> Movie Duration: </strong>
-                <span>{movie.duration} mins</span>
-             </div>
-              <div style={{marginTop: 16}}>
-                <Button type="primary">Book Tickets</Button>
-             </div>
-             <div className="d-flex">
-                <label>Choose date:</label>
-                <Input type="date" value={date} onChange={handleDateChange}/>
-             </div>
-            </Col>
-        </Row>
-    </Card>
+const isSeatSelected=(seatNumber)=>{
 
-    {(theatres && theatres.length>0 )?
-    (theatres.map((theatre)=>
-        {
-        return (
-        <div key={theatre._id}>
-            <Row gutter={24} key={theatre._id}>
-                <Col xs={{span : 24}} lg={{span: 8}}>
-                <h3>{theatre.name}</h3>
-                <strong>Address: </strong>
-                <p>{theatre.address}</p>
-                <Col xs={{span:24}} lg={{span:16}}>
-                <ul className="show-ul">
-                    {theatre.shows.sort((a,b)=>moment(a.time,"HH:mm")-moment(b.time,"HH:mm"))
-                    .map((singleShow)=>(
-                        <li key={singleShow._id} onClick={()=>navigate(`/bookshow/${singleShow._id}`)}>
-                            {moment(singleShow.time,"HH:mm").format("hh:mm A")}</li>
-                    ))
-                    }
+    return selectedSeats.includes(seatNumber) || false;
+}
+
+const getSeatStyle=(seatNumber)=>{
+    if(isSeatBooked(seatNumber))
+    {   console.log(isSeatBooked(seatNumber))
+        return{
+            backgroundColor: "#d9d9d9",
+            cursor: "not-allowed",
+            color: "#8c8c8c"
+             }}
+
+     if(isSeatSelected(seatNumber))
+       { console.log(isSeatSelected(seatNumber))
+         return{
+            backgroundColor: "#1890ff",
+            cursor: "pointer",
+            color: "#ffffff"
+             }}
+              console.log(`isSeatBooked= ${isSeatBooked(seatNumber)} isSeatSelected= ${isSeatSelected(seatNumber)} `)
+    return {
+        backgroundColor: "#f0f0f0",
+        cursor: "pointer"
+      
+    }  
+}
+
+
+const handleBooking=async()=>{
+
+}
+
+return(
+     <div style={{padding:24, maxWidth: 1200, margin: "0 auto"}}>Book Show
+     <Card>
+        <div style={{marginBottom: 24}}>
+     <Title level={2}>
+        {show?.movie?.title}
+     </Title>
+
+     <div style={{display: "flex", flexDirection: "column" , gap:8}}>
+        <div>
+            <Text><strong>Theatre </strong></Text>
+            <Text>{show?.theatre?.name}</Text>
+        </div>
+        <div>
+            <Text><strong>Date </strong></Text>
+            <Text>{moment(show?.date).format("DD-MM-YYYY ")}</Text>
+        </div>
+        <div>
+            <Text><strong>Time </strong></Text>
+            <Text>{show?.time}</Text>
+        </div>
+        <div>
+            <Text><strong>Price </strong></Text>
+            <Text>{show?.ticketPrice}</Text>
+        </div>
+     </div>
+     </div>
+     </Card>
+     <Divider/>
+     {/*screen ui*/}
+
+     <div style={{textAlign: "center", marginBottom: "30px"}}>
+        <Title strong level={3}>SCREEN</Title>
+     </div>
+
+     {/*seats ui*/}
+     <div style={{marginBottom: "24px"}}>
+        <div style={{display: "grid",
+         gridTemplateColumns:`repeat(${COLUMNS}, 1fr)`
+         , gap:8,
+            marginBottom: 20 }}>
+
+            {Array.from({length: 100},(_,index)=>
+            {
+                const seatNumber= index+1;
+                return <Button
+                onClick={()=>handleSeatClick(seatNumber)}
+                disabled={isSeatBooked(seatNumber)}
+                key={seatNumber+"seatNo"}
+                style={{
+                    ...getSeatStyle(seatNumber),
+                    height: 40,
+                    minWidth: 40,
+                    padding: 2,
+                    border: "solid 1px #cacaca"
+                }}
+                >{seatNumber}</Button>
+            })}
+        </div>
+
+        {/* lEGENDS */}
+        <div style={{marginBottom: "24px"}}>
+            <Space size={"large"}>
+                <div style={{
+                    width: 20,
+                    height: 20,
+                    backgroundColor: "#f0f0f0",
+                    border: "solid 1px #d9d9d9",
+                }}/>
+                    <Text> Available</Text>
+            </Space>
+             <Space>
+                <div style={{
+                    width: 20,
+                    height: 20,
+                    backgroundColor: "#f0f0f0",
                     
-                </ul>
-                </Col>
-                </Col>
-                </Row>
-                </div>
-                );
-        })
-    ): null}
+                }}/>
+                    <Text> Booked</Text>
+            </Space>
+        </div>
+
+        <Divider/>
+        {/*booking summary*/}
+        <div style={{ marginBottom:"24px", textAlign:"center"}}>
+            <div style={{display: "flex", flexDirection: "column", gap:12, width: "100%"}}>
+
+                <Text strong> Seats Selected:</Text>
+                <Text> {selectedSeats.length>0?selectedSeats.sort((a,b)=>a-b).join(","): "None"}</Text>
+            </div>
+             <div style={{display: "flex", flexDirection: "column", gap:12, width: "100%"}}>
+
+                <Text strong> Total Seats Selected:</Text>
+                <Text> {selectedSeats.length}</Text>
+            </div>
+              <div style={{display: "flex", flexDirection: "column", gap:12, width: "100%"}}>
+
+                <Text strong> Total Price:</Text>
+                <Text> {totalPrice}</Text>
+            </div>
+        </div>
+     </div>
+
+     {/*book button*/}
+    <Button type="primary" size="large" onClick={handleBooking}
+        loading={loading} disabled={selectedSeats.length===0 || loading}>
+
+            Book Now
+        </Button>
 </div>
-)}*/
-return <div>Book SHow</div>
+)
 }
 export default BookShow
