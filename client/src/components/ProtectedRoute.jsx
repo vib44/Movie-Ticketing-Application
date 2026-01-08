@@ -15,7 +15,7 @@ function ProtectedRoute({children}) {
     try {
       const user=await getCurrentUser();
       if(user)
-          dispatch(setUserData(user))
+          {dispatch(setUserData(user))}
     } catch (error) {
       console.error("Error fetching user data:",error)
     }
