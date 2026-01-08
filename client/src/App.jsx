@@ -11,24 +11,70 @@ import Admin from "./pages/Admin/index"
 import Partner from "./pages/Partner"
 import SingleMovie from './pages/User/SingleMovie'
 import BookShow from './pages/User/BookShow'
+import RoleBasedRoute from './components/RoleBasedRoute'
+import MyBooking from './pages/User/MyBooking'
 
 function App() {
   return (
     <>
-        
+
       <BrowserRouter>
         <Routes>
-          <Route path="/home" element={<Home/>} />
-          <Route path="/login" element={<Login/>}/>
-          <Route path="/register" element={<Register/>}/>
-          <Route path="/admin" element={<Admin/>}/>
-          <Route path="/theatre" element={<Partner/>}/>  
-          <Route path="/singleMovie/:id" element={<SingleMovie/>}/>
-          <Route path="/bookshow/:id" element={<BookShow/>}/>    
-            </Routes>
-      </BrowserRouter>      
+
+          {/*Public Routes */}
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+
+          {/*Protected Routes - User Only*/}
+
+          <Route path="/home" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRoles={["user"]}>
+              <Home />
+            </RoleBasedRoute>
+          </ProtectedRoute>} />
+          
+          <Route path="/singleMovie/:id" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRole={["user"]}>
+             <SingleMovie />
+            </RoleBasedRoute>
+          </ProtectedRoute>}/>
+
+          <Route path="/bookshow/:id" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRole={["user"]}>
+              <BookShow />
+            </RoleBasedRoute>
+          </ProtectedRoute>}/>
+
+        { /* <Route path="/payment-success" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRole={["user"]}>
+              <PaymentSuccess />
+            </RoleBasedRoute>
+          </ProtectedRoute>}/>*/}
+
+          <Route path="/ay-bookings" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRole={["user"]}>
+              <MyBooking />
+            </RoleBasedRoute>
+          </ProtectedRoute>}/>
+
+          {/*Protected Routes-Other roles*/}
+          
+          <Route path="/admin" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRole={["admin"]}>
+            <Admin />
+            </RoleBasedRoute>
+          </ProtectedRoute>}/>
+
+          <Route path="/theatre" element={<ProtectedRoute>
+            <RoleBasedRoute allowedRole={["partner"]}>
+              <Partner />
+            </RoleBasedRoute>
+          </ProtectedRoute>}/>
+        </Routes>
+      </BrowserRouter>
     </>
   )
+
 }
 
 export default App
