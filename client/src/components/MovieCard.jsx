@@ -1,29 +1,49 @@
 import React from 'react';
-import { Card ,Tag, Typography} from 'antd';
-const { Meta } = Card;
-const { Text } = Typography;
-const MovieCard = (props) => {
-    const { title,rating,genre,language,posterPath, onClick}= props;
-  
+import { Card ,Tag, Typography, Rate, Space} from 'antd';
+import { PlayCircleOutlined, StarFilled } from "@ant-design/icons"
+import "./MovieCard.css"
+
+const { Text, Title } = Typography;
+function MovieCard ({title, posterUrl,rating,language,onClick})
+{  
   return (
   <Card
     hoverable
-    style={{ width: 240 }}
-    cover={
-      <img
-        draggable={false}
-        alt="cover"
-        src={posterPath}
-      />
-    }
+    className="movie-card"
     onClick={onClick}
+    cover={
+      <div className="movie-poster-container">
+        <img src={posterUrl}
+        alt={title}
+        className="movie-poster"
+        onError={(e)=>{
+          e.target.src="https://via.placeholder.com/300x450?text=No+Image"
+        }}/>
+        <div className="movie-overlay">
+          <PlayCircleOutlined className="play-icon"/>
+        </div>
+      </div>
+    }
   >
-    <Meta title={title}/>
-    <div>
-        <Text>{rating}</Text>
+   <div className="movie-card-content">
+    <Title level={5} className="movie-title">
+      {title}
+    </Title>
+
+    <div className="movie-rating">
+      <StarFilled className="star-icon"/>
+      <Text strong className="rating-text">
+        {rating ? `${rating}/10`: "N/A"}
+      </Text>
     </div>
-    <Tag color="blue">{genre}</Tag>
-    <Tag>{language}</Tag>
+
+    <Space size={[8,8]} wrap className="movie-tags">
+      <Tag color="blue" className="movie-tag">
+        {genre}
+      </Tag>
+      <Tag className="movie-tag">{language}</Tag>
+    </Space>
+    </div>
   </Card>
 );
 }
