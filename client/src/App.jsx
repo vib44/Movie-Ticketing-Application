@@ -2,6 +2,7 @@ import { useState } from 'react'
 import "./App.css"
 import Login from "./pages/Login"
 import Home from "./pages/Home"
+import Landing from "./pages/Landing"
 import Register from "./pages/Register"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import NavBar from './components/Navbar'
@@ -20,6 +21,8 @@ function App() {
 
       <BrowserRouter>
         <Routes>
+          {/*Landing Page*/}
+          <Route path="/" element={<Landing/>}/>
 
           {/*Public Routes */}
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />

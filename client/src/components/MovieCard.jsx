@@ -4,7 +4,7 @@ import { PlayCircleOutlined, StarFilled } from "@ant-design/icons"
 import "./MovieCard.css"
 
 const { Text, Title } = Typography;
-function MovieCard ({title, posterUrl,rating,language,onClick})
+function MovieCard ({title, posterPath,rating,language,onClick,genre})
 {  
   return (
   <Card
@@ -13,7 +13,7 @@ function MovieCard ({title, posterUrl,rating,language,onClick})
     onClick={onClick}
     cover={
       <div className="movie-poster-container">
-        <img src={posterUrl}
+        <img src={posterPath}
         alt={title}
         className="movie-poster"
         onError={(e)=>{

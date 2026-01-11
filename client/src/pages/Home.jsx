@@ -9,7 +9,7 @@ import {useNavigate} from 'react-router-dom'
 import { Typography, Row, Col, Spin, Empty } from "antd";
 import "./Home.css";
 
-const { Title }= Typography;
+const { Title }= Typography
 
 function Home (){
 
@@ -36,7 +36,7 @@ function Home (){
 
   return (
  <div className="home-page">
-  <Navbar/>
+  <NavBar/>
   <div className="home-container">
     <div className="home-header">
       <Title level ={1} className="home-title">
@@ -56,7 +56,7 @@ function Home (){
               {movies.map((movieObj, index)=>(
                 <Col xs={24} sm={12} md={8} lg={6} xl={6} key={index}>
                   <MovieCard title={movieObj.title}
-                  posterUrl={movieObj.language}
+                  posterPath={movieObj.posterPath}
                   language={movieObj.language}
                   rating={movieObj.rating}
                   genre={movieObj.genre}
