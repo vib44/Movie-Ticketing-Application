@@ -1,10 +1,15 @@
 import React from "react";
-import {Form, Input, Button } from 'antd';
+import {Form, Input, Button ,message,Card,Typography,Radio} from 'antd';
 import {Link} from "react-router-dom"
 import {register} from  "../backend/auth"
+import {VideoCameraOutlined} from "@ant-design/icons"
+import "./Auth.css"
+
+const { Title, Text}= Typography
 
 function Register() {
 
+  const navigate=useNavigate()
    const onSubmit= async(values)=>
     {
          try {

@@ -8,7 +8,7 @@ const isAuth= async(req, res, next)=>
         return res.status(401).json(
     {
         success: false,
-        message: "User not authorized"
+        message: "User not authorized, no token!"
     })
 
     try {
