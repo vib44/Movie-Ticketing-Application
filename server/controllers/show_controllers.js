@@ -2,6 +2,19 @@ const Show = require("../models/show_models")
 const addShows=async(req,res)=>
 {
     try {
+        //Security: Partners can only add shows to their theatres
+        if(req.user.role==="partner" && req.body.theatre)
+        {
+            const Theatre=require("../models/theatre.model.js")
+            const theatre= await Theatre.findById(req.body.theatre)
+            if(theatre && theatre.owner.toString()!==req.userId)
+            {
+                return res.send({
+                    success: false,
+                    message: "Access denied. You can only add shows to your own theatres."
+                })
+            }
+        }
         const newShow= new Show(req.body);
         await newShow.save()
         console.log(newShow)
@@ -25,19 +38,31 @@ const updateShow=async(req,res)=>
 {
     try {
        // const ShowId= req.params.id;
-       const showUpdated= await Show.findByIdAndUpdate(req.body.showId,req.body)
+       const show= await Show.findById(req.body.showId).populate("theatre")
+   
+if(!show)
+    return res.send({
+success: false,
+message: "Show not found"})
+
+//Security : Partners can only update shows from their own theatres
+if(req.user.role==="partner" && show.theatre.owner.toString()!==req.userId)
+     return res.send({
+success: false,
+message: "Access denied. You can only update shows for your theatres"})
+
+await Show.findByIdAndUpdate(req.body.showId, req.body)
        res.send(
             {
                 success: true,
                 message: "Show Updated successfully",
-                data: showUpdated
             }
         )
     } catch (error) {
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to update Show",
+                message: "error.message",
             }
         )}
 }
@@ -45,7 +70,20 @@ const updateShow=async(req,res)=>
 const deleteShow=async(req,res)=>
 {
     try {
-        //const ShowId= req.params.id;
+       const show=await Show.findById(req.body.showId).populate("theatre")
+       if(!show){
+        return res.send({
+            success:false,
+            message: "Show not found",
+        })
+       }
+
+       //Security : Partners can only delete shows from their own theatres
+       if(req.user.role==="partner" && show.theatre.owner.toString()!==req.userId)
+        return res.send({
+    success: false,
+message: "Access denied. You can only delete shows from your own thetares."})
+        
         await Show.findByIdAndDelete(req.body.showId)
        res.send(
             {
@@ -58,35 +96,37 @@ const deleteShow=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to delete Show",
+                message: error.message,
             }
         )}
-}
+    }
+
 
 //get all shows & theatres for a movie
 const getAllShows=async(req,res)=>
 {
     try {
         const {movie, date}=req.body
-        const allShows= await Show.find({movie, date}).populate("theatre").populate("movie");
+        const allShows= await Show.find({movie, date}).populate("theatre");
         
         console.log("allshows",allShows)
        //map shows with unique theatres
-        let uniqueTheatres=[]
-        allShows.forEach((show)=>{
-            let isTheatre= uniqueTheatres.find((theatre)=>
-            theatre._id===show.theatre._id)
+       const theatreMap = {}
 
-        if(!isTheatre)
-        {
-            let showsofThisTheatre= allShows.filter((showObj)=>
-                showObj.theatre._id==show.theatre._id
-            )
-            uniqueTheatres.push({
-                ...show.theatre._doc,
-                shows: showsofThisTheatre
-            })
-        } })
+allShows.forEach(show => {
+  const theatreId = show.theatre._id
+
+  if (!theatreMap[theatreId]) {
+    theatreMap[theatreId] = {
+      ...show.theatre._doc,
+      shows: []
+    }
+  }
+
+  theatreMap[theatreId].shows.push(show)
+})
+
+const uniqueTheatres = Object.values(theatreMap)
        res.send(
             {
                 success: true,
@@ -98,7 +138,7 @@ const getAllShows=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to fetch Show",
+                message: error.message,
             }
         )}
 }
@@ -107,9 +147,9 @@ const getShowById=async(req,res)=>
 {
     try {
         
-        const show= await Show.findById(req.body.id)
-        .populate("theatre")
+        const show= await Show.findById(req.body.showId)
         .populate("movie")
+        .populate("theatre")
        res.send(
             {
                 success: true,
@@ -121,7 +161,7 @@ const getShowById=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to fetch Show",
+                message: error.message,
             }
         )}
 }

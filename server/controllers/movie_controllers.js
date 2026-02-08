@@ -1,4 +1,4 @@
-const Movie = require("../models/movie_models")
+const Movie = require("../models/movie_models.js")
 
 const addMovies=async(req,res)=>
 {
@@ -46,8 +46,8 @@ const updateMovie=async(req,res)=>
 const deleteMovie=async(req,res)=>
 {
     try {
-        //const movieId= req.params.id;
-        const movie= await Movie.findByIdAndDelete(req.body.movieId)
+        const movieId= req.params.id;
+        const movie= await Movie.findByIdAndDelete(movieId,req.body)
        res.send(
             {
                 success: true,
@@ -80,7 +80,7 @@ const getAllMovies=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to fetch movie",
+                message: error.message,
             }
         )}
 }
@@ -101,7 +101,7 @@ const getMovieById=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to fetch movie",
+                message: error.message,
             }
         )}
 }

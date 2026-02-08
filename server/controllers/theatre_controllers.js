@@ -1,22 +1,30 @@
 const Theatre = require("../models/theatre_models")
+const isAuth=require("../middlewares/authMiddleware.js")
+const {requirePartnerOrAdmin}=require("../middlewares/roleMiddleware.js")
 const addTheatres=async(req,res)=>
 {
     try {
+        console.log("Received theatre data:", req.body)
+        //Security: Partners can only add theatres with themselves as owner
+        if(req.user.role==="partner")
+            req.body.owner=req.userId 
+
         const newTheatre= new Theatre(req.body);
-        await newTheatre.save()
+        const savedTheatre=await newTheatre.save()
+        console.log("Saved theatre:",savedTheatre)
 
         res.status(200).send(
             {
                 success: true,
                 message: "New Theatre added",
-                data: newTheatre
+                data: savedTheatre
             }
         )
     } catch (error) {
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to add Theatre",
+                message: "error.message",
             })
     }
 }
@@ -25,19 +33,30 @@ const updateTheatre=async(req,res)=>
 {
     try {
        // const theatreId= req.params.id;
-       const theatreUpdated= await Theatre.findByIdAndUpdate(req.body.theatreId,req.body)
+       const theatre=await Theatre.findById(req.body.theatreId)
+       if(!theatre)
+        return res.send({
+    success: false,
+message: "Theatre not found"})
+        //Security: Partners can only update their own theatres
+        if(req.user.role==="partner" && theatre.owner.toString()!==req.userId)
+            return res.send({
+        success: false,
+    message: "Access denied. You can only update your theatres"})
+           
+    await Theatre.findByIdAndUpdate(req.body.theatreId,req.body)
        res.send(
             {
                 success: true,
                 message: "Theatre Updated successfully",
-                data: theatreUpdated
+               
             }
         )
     } catch (error) {
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to update Theatre",
+                message: error.message,
             }
         )}
 }
@@ -46,8 +65,20 @@ const deleteTheatre=async(req,res)=>
 {
     try {
         //const theatreId= req.params.id;
-        await Theatre.findByIdAndDelete(req.body.theatreId)
-       res.send(
+       const theatre= await Theatre.findById(req.body.theatreId)
+       if(!theatre)
+        return res.send({
+    success: false,
+message: "Theatre not found"})
+
+//Security: Partners can only delete their own theatres
+if(req.user.role==="Partner" && theatre.owner.toString()!==req.userId)
+    return res.send({
+success: false,
+message: "Access denied. You can only delete your theatres"})
+       
+await Theatre.findByIdAndDelete(req.body.theatreId)
+res.send(
             {
                 success: true,
                 message: "Theatre Deleted successfully",
@@ -58,7 +89,7 @@ const deleteTheatre=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to delete Theatre",
+                message: error.message,
             }
         )}
 }
@@ -79,7 +110,7 @@ const getAllTheatres=async(req,res)=>
         res.status(500).send(
             {
                 success: false,
-                message: "Failed to fetch Theatre",
+                message: error.message,
             }
         )}
 }

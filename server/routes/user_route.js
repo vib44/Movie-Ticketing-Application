@@ -2,15 +2,24 @@ const express = require("express")
 const bcrypt = require("bcrypt");
 const User = require("../models/user_models.js")
 
-const userRouter = express.Router();// router form exprrss
 const jwt = require("jsonwebtoken")
 
 const isAuth = require("../middlewares/authMiddleware.js")
+const userRouter = express.Router();// router form express
 
 //register API
 
 userRouter.post("/register", async (req, res) => {
     try {
+// Prevent admin registration through API
+        if(req.body.role==="admin")
+        {
+            return res.send({
+                success:  false,
+                message: "Admin registration is not allowed through this endpoint"
+            })
+        }
+
         const queryUser = await User.findOne({ email: req.body.email })
 
         if (queryUser) {
@@ -21,6 +30,12 @@ userRouter.post("/register", async (req, res) => {
                     message: "User already exists with this email"
                 })
         }
+
+        //Set default role to 'user' if not provided or if invalid
+        const allowedRoles=["user","partner"]
+        if(!req.body.role || !allowedRoles.includes(req.body.role))
+                req.body.role="user"
+
         //hashing pwd
         const salt = await bcrypt.genSalt() //default 10 rounds
         const hashedpwd = bcrypt.hashSync(req.body.password, salt)
@@ -35,7 +50,9 @@ userRouter.post("/register", async (req, res) => {
             })
     } catch (error) {
         console.log("error", error)
-        res.status(500).json({ message: "Something went wrong" })
+        res.status(500).json({ 
+            sucess: false,
+            message: error.message || "Registration failed" })
     }
 })
 
@@ -55,8 +72,11 @@ userRouter.post("/login", async (req, res) => {
         }
 
         //RETURNS PROMISE
-        const isvalidpassword = await bcrypt.compare(req.body.password, user.password)
-        console.log(isvalidpassword, ` ${user.password}`)
+        const isvalidpassword = await bcrypt.compare(
+            req.body.password,
+             user.password
+            )
+ 
         if (!isvalidpassword)
             return res.status(401).send({
                 success: false,
@@ -92,8 +112,12 @@ userRouter.post("/login", async (req, res) => {
             {
                 success: true,
                 message: "Logged in successfully",
-                token: token,
-                user: user
+                user:{
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role
+                }
             })
     }
     catch (err) {

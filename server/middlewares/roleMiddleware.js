@@ -1,21 +1,44 @@
-const jwt=require("jsonwebtoken")
+ const User= require("../models/user_models.js")
 
-const isAuth= async(req, res, next)=>
-{
-    const token=req.cookies.jwtToken;
-    if(!token)
-        return res.status(401).json(
-    {
-        message: "User not authorized"
-    })
-
+ const requiredRole= (...allowedRoles)=>{
+ return async(req,res,next)=>{
     try {
-        const decoded=jwt.verify(token,process.env.JWT_SECRET)
-        req.userId=decoded.userId;
-        next();
+          const user= await User.findById(req.userId).select("-password")
+          if(!user)
+                return res.status(401).send({
+                success: false,
+                message: "User does not exist"
+                }) 
+          if(!allowedRoles.includes(user.role))
+                return res.status(403).send({
+            success: true,
+            message: "Access denied. Insufficient Permissions"
+            })      
+        
+            req.user=user;
+            next()
     } catch (error) {
-        return res.status(500).json({message:"Something went wrong"})
+        console.error(error.message)
+        return res.status(500).send({
+            success: false,
+            message: "Access error"
+        })
     }
-}
+ 
+ }
+ }
 
-module.exports=isAuth;
+ // Each Middlewares to check if 
+ // user is a regular user/admin/partner/partner or admin
+
+ const requiredUser=requiredRole("user")
+ const requiredPartner=requiredRole("partner")
+ const requiredAdmin=requiredRole("admin")
+ const requiredAdminOrPartner=requiredRole("partner","admin")
+
+ module.exports={requiredRole,
+    requiredUser,
+    requiredPartner,
+    requiredAdmin,
+    requiredAdminOrPartner
+ }
