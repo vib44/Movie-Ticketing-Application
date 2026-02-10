@@ -70,7 +70,7 @@ function Navbar() {
 
           <div className="navbar-actions">
             {userData?.role === "user" &&
-              (<Link to="/my-booking">
+              (<Link to="/my-bookings">
                 <Button type="link" className="nav-link">
                   My Bookings
                 </Button>

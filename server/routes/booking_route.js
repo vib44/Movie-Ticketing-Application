@@ -10,6 +10,50 @@ const { addBookings, updateBooking, deleteBooking,
 
 const BookingRouter = express.Router();
 
+//Helper function to update booking status to completed
+async function completeBooking(booking, session) {
+    //Check if already complted
+    if (booking.status === "completed")
+        return { success: true, message: "Booking already confirmed", booking }
+
+
+    // Check if seats are still available
+    const show = await Show.findById(booking.show);
+    if (!show) {
+        booking.status = "failed";
+        await booking.save();
+        return { success: false, message: "Show not found", booking };
+    }
+
+    //Check if any of the selected seats are already booked
+    const conflictingSeats = booking.seats.filter((seat) =>
+        show.bookedSeats.includes(seat)
+    );
+
+    if (conflictingSeats.length > 0) {
+        booking.status = "failed"
+        await booking.save()
+        return {
+            success: false,
+            message: `Seats ${conflictingSeats.join(",")} are already booked`,
+            booking
+        }
+    }
+
+    //Update booking
+    booking.stripePaymentIntentId = session.payment_intent;
+    booking.status = "completed"
+    await booking.save();
+
+    //Update show's bookedSeats array
+    show.bookedSeats = [...show.bookedSeats, ...booking.seats]
+    await show.save();
+
+    return {
+        success: true,
+        message: "Booking confirmed", booking
+    }
+}
 //Create Stripe Check out session (User only)
 BookingRouter.post("/create-checkout-session", isAuth, requiredUser, async (req, res) => {
     try {
@@ -18,282 +62,270 @@ BookingRouter.post("/create-checkout-session", isAuth, requiredUser, async (req,
 
         //Security : Users can only create bookings for themselves
         if (userId !== req.userId)
-return res.send({
-    success: false,
-    message: "Access denied. You can only create bookings for yourself."
-})
-if (!amount || amount <= 0)
-    return res.send({
-        success: false,
-        message: "Invalid Amount"
-    })
+            return res.send({
+                success: false,
+                message: "Access denied. You can only create bookings for yourself."
+            })
+        if (!amount || amount <= 0)
+            return res.send({
+                success: false,
+                message: "Invalid Amount"
+            })
 
-//Create a pending booking record
-const booking = new Booking({
-    show: showId,
-    user: userId,
-    seats: seats,
-    totalAmount: amount,
-    status: "pending"
+        //Create a pending booking record
+        const booking = new Booking({
+            show: showId,
+            user: userId,
+            seats: seats,
+            totalAmount: amount,
+            status: "pending"
 
-})
-await booking.save();
+        })
+        await booking.save();
 
-//Prepare customer information for Indian Regulations
-const customerInfo = {}
-if (customerName)
-    customerInfo.customer_email = customerEmail
+        //Prepare customer information for Indian Regulations
+        const customerInfo = {}
+        if (customerName)
+            customerInfo.customer_email = customerEmail
 
-//Create Stripe checkout session with customer information
-const session = await stripe.checkout.session.create({
-    payment_method_types: ["card"],
-    line_items: [
-        {
-            price_data: {
-                currency: "inr",
-                product_data: {
-                    name: `Movie Ticket - ${showName || "Booking"}`,
-                    description: `Seats: ${seats.sort((a, b) => a - b).join(",")}`
-                },
-                unit_amount: amount * 100, //Stripe expects amounts in paise 
-            },
-            quantity: 1
-        }
-    ],
-    mode: "payment",
-    customer_email: customerEmail,
-    billing_address_collection: "required",//required for Indian regulations
-    shipping_address_collection: {
-        allowed_countries: ["IN"]
-    },//India only
-    success_url: `${process.env.CLIENT_URL || "http://localhost:5173"}/bookshow/${showId}`,
-    metadata: {
-        bookingId: booking._id.toString(),
-        showId: showId,
-        userId: userId,
-        seats: JSON.stringify(seats),
-        customerName: customerName || "",
-    }
-})
-console.log(session.url)
-console.log(session.id)
+        //Create Stripe checkout session with customer information
 
-//Update booking with session Id
-booking.stripeSessionId = session.id;
-await booking.save()
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [
+                {
+                    price_data: {
+                        currency: "inr",
+                        product_data: {
+                            name: `Movie Ticket - ${showName || "Booking"}`,
+                            description: `Seats: ${seats.sort((a, b) => a - b).join(",")}`
+                        },
+                        unit_amount: amount * 100, //Stripe expects amounts in paise 
+                    },
+                    quantity: 1
+                }
+            ],
+            mode: "payment",
+            customer_email: customerEmail,
+            billing_address_collection: "required",//required for Indian regulations
+            shipping_address_collection: {
+                allowed_countries: ["IN"]
+            },//India only
+            success_url: `${process.env.CLIENT_URL || "http://localhost:5173"
+                }/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL || "http://localhost:5173"
+                }/bookshow/${showId}`,
+            metadata: {
+                bookingId: booking._id.toString(),
+                showId: showId,
+                userId: userId,
+                seats: JSON.stringify(seats),
+                customerName: customerName || "",
+            }
+        })
+        console.log(session.url)
+        console.log(session.id)
 
-res.send({
-    success: true,
-    message: "Checkout session created",
-    data: {
-        sessionId: session.id,
-        url: session.url,
-    }
-})
+        //Update booking with session Id
+        booking.stripeSessionId = session.id;
+        await booking.save()
+
+        res.send({
+            success: true,
+            message: "Checkout session created",
+            data: {
+                sessionId: session.id,
+                url: session.url,
+            }
+        })
     } catch (error) {
-    console.error("Error creating Stripe session:", error);
-    res.send({
-        success: false,
-        message: error.message || "Failed to create checkout session",
-    })
-}
+        console.error("Error creating Stripe session:", error);
+        res.send({
+            success: false,
+            message: error.message || "Failed to create checkout session",
+        })
+    }
 }
 )
 //Verify payment and confirm booking (User only)
-bookingRouter.post("/verify-payment", isAuth, requiredUser, async (req, res) => {
+BookingRouter.post("/verify-payment", isAuth, requiredUser, async (req, res) => {
     try {
         const { sessionId } = req.body;
         console.log("HERE verify-payment");
 
         //Retrieve the session from Stripe
         const session = await stripe.checkout.sessions.retrieve(sessionId)
-       
+        console.log("Payment status=",session.payment_status)
         if (session.payment_status !== "paid")
             return res.send({
                 success: false,
                 message: "Payment not completed",
             })
 
-            //Find booking
-            const booking=await Booking.findById(session.metadata.bookingId)
-            console.log("Booking : ",booking)
-            if(!booking)
-            {
-                return res.send({
-                    success: false,
-                    message: "Booking not found",
-                })
-            }
-
-            //Check if already completed
-            if(booking.status="completed"){
-                console.log("Completed Booking : ",booking)
-
-                return res.send({
-                    success: true,
-                    message: "Booking already confirmed",
-                    data: booking,
-                })
-            }
-
-        //Check if seats are still available
-        const show=await Show.findById(booking.show)
-        if(!show)
-        {
-                console.log("Booking 157 :",booking);
-
+        //Find booking
+        const booking = await Booking.findById(session.metadata.bookingId)
+        console.log("Booking : ", booking)
+        if (!booking) {
             return res.send({
                 success: false,
-                message: "Show not found",
+                message: "Booking not found",
             })
         }
 
-        //Check if any of the selected seats are already booked
-        const conflictingSeats=booking.seats.filter((seat)=>
-        show.bookedSeats.include(seat));
+        //Use helper function to complete booking
 
-        if(conflictingSeats.length>0)
-        {
-            console.log("Booking for Conflicting Seats: ",booking)
-            booking.status="failed"
-            await booking.save();
+        const result = await completeBooking(booking, session)
+        if (!result.success)
             return res.send({
-                success:false,
-                message: `Seats ${conflictingSeats.join(",")} are already booked`,
+                success: false,
+                message: result.message
             })
-        }
-
-        //Update booking
-        booking.stripePaymentIntentId=session.payment_intent;
-        booking.status="completed"
-        console.log("Updated Booking : ",booking)
-
-        await booking.save();
-        console.log("Saved Booking : ",booking)
-
-        //Update show's bookedSeats array
-        show.bookedSeats=[...show.bookedSeats, ...booking.seats];
-        await show.save();
 
         //Populate booking data before sending response
-        const populatedBooking= await Booking.findById(booking._id)
-        .populate("show")
-        .populate({
-            path:"show",
-            populate: [{path: "movie"},{path: "theatre"}],
-        })
-
-        console.log("Populated Booking : ",populatedBooking)
+        const populatedBooking = await Booking.findById(booking._id)
+            .populate("show")
+            .populate({
+                path: "show",
+                populate: [{ path: "movie" }, { path: "theatre" }]
+            })
+        console.log("booking 200 populatedBooking=", populatedBooking)
 
         res.send({
-            success:true,
-            message: "Payment verified and booking confirmed",
-            data: populatedBooking,
+            success: true,
+            message: "Payment verified and booking confirmed!",
+            data: populatedBooking
         })
     }
     catch (error) {
-        console.log("Error verifying payment: ",error);
-        console.log("error booking")
-
+        console.error("Error verifying payment:", error)
+        console.log("error booking 210")
         res.send({
             success: false,
-            message: error.message || "Failed to verify payment",
-
+            message: error.message || "Failed to verify payment"
         })
     }
 })
 
-//Get user bookings (Authenticated - users can see their own)
-bookingRouter.post("/get-user-bookings",isAuth, async(req,res)=>{
-    try{
-        const {userId}=req.body;
-        const authenticatedUserId=req.userId;
+// Note: Webhook endpoint is registered directly in server/index.js
+// to ensure it receives raw body before express.json() middleware
 
-        //Security : Users can only see their own bookings, Admins can see any
-        if(req.userRole==="user" && userId!==authenticatedUserId)
-        {
+// Sync pending bookings - check Stripe and update status (User only)
+
+BookingRouter.post("/sync-pending-booking", isAuth, requiredUser, async (req, res) => {
+    try {
+        const { bookingId } = req.body
+        if (!bookingId) {
+            return res.send({
+                success: false,
+                message: "Booking id is required"
+            })
+        }
+        //Find the booking
+        const booking = await Booking.findById(bookingId)
+        if (!booking)
+            return res.send({
+                success: false,
+                message: "Booking not found"
+            })
+
+        //Security: Users can only sync their bookings
+        if (booking.user.toString() !== req.userId)
+            return res.send({
+                success: false,
+                message: "Access denied. You can only sync your bookings"
+            })
+
+        //if already completed return success
+        if (booking.status === "completed")
+            return res.send({
+                success: true,
+                message: "Booking already confirmed",
+                data: booking
+            })
+
+        //Check if booking has a stripe session id
+        if (!booking.stripeSessionId)
+            return res.send({
+                success: false,
+                message: "No stripe session found for this booking"
+            })
+
+
+        //Retrieve the session from stripe
+        const session = await stripe.checkout.sessions.retrieve(booking.stripeSessionId)
+
+        //Check payment status
+        if (session.paymemt_status !== "paid")
+            return res.send({
+                success: false,
+                message: `Payment status: ${session.payment_status}`
+            })
+
+        //Complete the booking
+        const result = await completeBooking(booking, session)
+        if (!result.success)
+            return res.send({
+                success: false,
+                message: result.message
+            })
+
+        //Populate booking data before sending response
+        const populatedBooking = await Booking.findById(booking._id)
+            .populate("show")
+            .populate({
+                path: "show",
+                populate: [{ path: "movie" }, { path: "theatre" }],
+            });
+
+        res.send({
+            success: true,
+            message: "Booking synced and confirmed!",
+            data: populatedBooking,
+        });
+    } catch (error) {
+        console.error("Error syncing booking:", error);
+        res.send({
+            success: false,
+            message: error.message || "Failed to sync booking",
+        });
+    }
+});
+
+
+// Get user bookings (Authenticated - users can see their own)
+BookingRouter.post("/get-user-bookings", isAuth, async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const authenticatedUserId = req.userId;
+
+        // Security: Users can only see their own bookings, Admins can see any
+        if (req.userRole === "user" && userId !== authenticatedUserId) {
             return res.send({
                 success: false,
                 message: "Access denied. You can only view your own bookings.",
-            })
+            });
         }
 
-        const bookings=await Booking.find({user:userId})
-        .populate("show")
-        .populate({
-            path: "show",
-            populate: [{path: "movie"},{path:"theatre"}],
-        })
-        .sort({createdAt:-1});
+        const bookings = await Booking.find({ user: userId })
+            .populate("show")
+            .populate({
+                path: "show",
+                populate: [{ path: "movie" }, { path: "theatre" }],
+            })
+            .sort({ createdAt: -1 });
 
         res.send({
-            success:true,
+            success: true,
             message: "Bookings fetched successfully",
             data: bookings,
-        })
-    }
-    catch(error)
-    {
-        console.error("Error fetching bookings: ", error)
-        res.send({
-            success: false,
-            message: error.message || "Failed to fetch bookings"
-        })
-    }
-})
-/*
-//create a Booking
-
-BookingRouter.post("/add", addBookings)
-
-//update
-BookingRouter.put("/update", updateBooking)
-
-//delete
-BookingRouter.delete("/delete/:id", deleteBooking)
-
-//get all Bookings
-BookingRouter.post("/get-all-theatres-by-movie", getAllBookings)
-
-//get Booking by id
-BookingRouter.post('/get-Booking-by-id', getBookingById)
-
-//get all Bookings by owners
-
-BookingRouter.post("/get-all-Bookings-by-owners", async (req, res) => {
-    try {
-        const response = await Booking.find({ owner: req.body.owner })
-        res.send({
-            success: true,
-            message: "All Bookings fetched successfully",
-            data: response
-        })
+        });
     } catch (error) {
-        console.log("Fetch thetares error", error)
+        console.error("Error fetching bookings:", error);
         res.send({
             success: false,
-            message: "Something went wront. Unable to fetch Bookings",
-        })
+            message: error.message || "Failed to fetch bookings",
+        });
     }
-})
-
-//get all Bookings for a partner
-
-BookingRouter.post("/get-all-Bookings", async (req, res) => {
-    try {
-        const allBookings = await Booking.find({ theatre: req.body.theatreId })
-            .populate("movie").populate("theatre");
-        res.send({
-            success: true,
-            message: "All Bookings fetched successfully",
-            data: allBookings
-        })
-    } catch (error) {
-        res.send({
-            success: false,
-            message: `Not able to fetch Bookings ${error}`
-        })
-    }
-})*/
+});
 
 module.exports = BookingRouter;

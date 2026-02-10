@@ -14,7 +14,7 @@ import SingleMovie from './pages/User/SingleMovie'
 import BookShow from './pages/User/BookShow'
 import RoleBasedRoute from './components/RoleBasedRoute'
 import MyBooking from './pages/User/MyBooking'
-
+import PaymentSuccess from './pages/PaymentSuccess'
 function App() {
   return (
     <>
@@ -48,13 +48,11 @@ function App() {
             </RoleBasedRoute>
           </ProtectedRoute>}/>
 
-        { /* <Route path="/payment-success" element={<ProtectedRoute>
-            <RoleBasedRoute allowedRole={["user"]}>
-              <PaymentSuccess />
-            </RoleBasedRoute>
-          </ProtectedRoute>}/>*/}
+         <Route path="/payment-success" 
+         element={<PaymentSuccess />}
+            />
 
-          <Route path="/ay-bookings" element={<ProtectedRoute>
+          <Route path="/my-bookings" element={<ProtectedRoute>
             <RoleBasedRoute allowedRole={["user"]}>
               <MyBooking />
             </RoleBasedRoute>

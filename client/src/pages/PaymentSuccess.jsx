@@ -1,4 +1,4 @@
-import React from "react"
+import React,{useState,useEffect} from "react"
 import {Button,Card,Spin,Typography,message,Space } from "antd"
 import {useSearchParams, useNavigate} from "react-router-dom"
 import { verifyPayment } from "../backend/booking" 
@@ -64,7 +64,7 @@ function PaymentSuccess(){
             <Card>
                 {paymentStatus ==="success" &&(
                 <div style={{textAlign: "center"}}>
-                 67   <CheckCircleOutlined style={{fontSize:64,
+                    <CheckCircleOutlined style={{fontSize:64,
                     color: "#52c41a" , marginBottom: 20}}/>
                     <Title level={2} style={{ color: "#52c41a"}}>
                         Payment Successful</Title>
@@ -89,7 +89,7 @@ function PaymentSuccess(){
                                 </div>)}
                                 <Space>
                                     <Button type="primary"
-                                    size="large" onClick={()=>navigate("my-bookings")}>
+                                    size="large" onClick={()=>navigate("/my-bookings")}>
                                         View My Bookings
                                     </Button>
                                     <Button size="large" onClick={()=>navigate("/home")}>
@@ -110,7 +110,7 @@ function PaymentSuccess(){
                             "Your payment could not be processed. Please try again."
                         : "We couldn't verify your payment. Please check your bookings or contact customer care"}
                             </Text>
-                            <Button type="priamry"
+                            <Button type="primary"
                             size="large"
                             onClick={()=>navigate("/home")}>
                                 Go to home

@@ -15,7 +15,7 @@ export const createCheckoutSession= async(paymentData)=>{
     try {
         const response=await api.post("/api/booking/create-checkout-session",paymentData)
         console.log(response)
-        return response
+        return response.data
     }
      catch (error) {
     console.log("Error creating checkout session:",error)
@@ -54,6 +54,24 @@ export const getUserBookings= async(userId)=>{
             message: error.response?.data?.message||
             error.message || "Failed to fetch bookings",
             data:[]
+        }
+    }
+}
+
+//Sync pending Bookings
+export const syncPendingBooking=async(bookingId)=>{
+    try{
+        const response=await api.post("/api/booking/sync-pending-booking",{bookingId})
+        return response.data 
+
+    }
+    catch(error)
+    {
+        console.error("Error syncing booking:", error)
+        return{
+            success: false,
+            message: error.response?.data?.message || error.message||
+            "Failed to sync booking"
         }
     }
 }

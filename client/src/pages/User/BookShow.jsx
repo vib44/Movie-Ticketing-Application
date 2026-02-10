@@ -88,7 +88,6 @@ function BookShow() {
             //  console.log(isSeatSelected(seatNumber))
             return {
                 backgroundColor: "#1890ff",
-                color: "white",
                 cursor: "pointer",
                 color: "#ffffff"
             }
@@ -102,12 +101,13 @@ function BookShow() {
 
     const totalPrice = selectedSeats.length * (show?.ticketPrice || 0)
     const handleBooking = async () => {
+        console.log("Selected seats length",selectedSeats.length)
         if (selectedSeats.length === 0) {
             message.warning("Please select seat to proceed")
             return
         }
         if (!userData || !userData._id) {
-            message.error("Please logint o book tickets")
+            message.error("Please login to book tickets")
             navigate("/login")
             return
         }
@@ -125,6 +125,7 @@ function BookShow() {
                 customerEmail: userData.email || "",
             })
 
+            console.log("BookShow response=",response)
             if (response.success && response.data.url) {
                 //Redirect to Stripe checkout
                 window.location.href = response.data.url;
@@ -143,7 +144,7 @@ function BookShow() {
 
     if (!show)
         return <div style={{ padding: 20 }}>Loading...</div>
-
+      const totalSeats = show.totalSeats || 0;
     return (
         <div style={{ padding: 20, maxWidth: 1200, margin: "0 auto" }}>Book Show
             <Card>
@@ -195,7 +196,7 @@ function BookShow() {
                         marginBottom: 20
                     }}>
 
-                        {Array.from({ length: 100 }, (_, index) => {
+                        {Array.from({ length: totalSeats }, (_, index) => {
                             const seatNumber = index + 1;
                             return (<Button
                                 onClick={() => handleSeatClick(seatNumber)}

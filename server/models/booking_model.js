@@ -4,7 +4,7 @@ const bookingSchema=new mongoose.Schema(
     {
         show:{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Show",
+            ref: "show",
             required:true
         },
         user:{type: mongoose.Schema.Types.ObjectId,
@@ -21,11 +21,11 @@ const bookingSchema=new mongoose.Schema(
         },
         stripeSessionId:{
             type: String,
-            required:false,
+           
         },
-        stripePaymentIntentionId:{
+        stripePaymentIntentId:{
             type: String,
-            required:false,
+           
         },
         status:{
             type: String,
@@ -35,6 +35,6 @@ const bookingSchema=new mongoose.Schema(
          
     },{timestamps: true})
 
-    const Booking=mongoose.model( 'booking' ,bookingSchema)
+    const Booking=mongoose.model( "booking" ,bookingSchema)
 
     module.exports=Booking;
