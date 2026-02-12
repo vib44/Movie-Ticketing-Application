@@ -5,6 +5,8 @@ const dotEnv= require("dotenv")
 const cors= require("cors")
 const cookieParser= require("cookie-parser")
 const rateLimit=require('express-rate-limit')
+const mongoSanitize=require('express-mongo-sanitize') //a standalone module that sanitizes inputs against query selector injection attacks:
+
 dotEnv.config();
 dbConfig.connectDb()
 
@@ -16,12 +18,20 @@ const bookingRoutes=require("./routes/booking_route.js")
 
 
 const limiter=rateLimit({
-    windowsMs: 15*60*1000, //15minutes
+    windowMs: 15*60*1000, //15minutes
     limit: 100, //Limit each IP to 100 requests per `window`(here,per 15 minutes).
     message: "Too many requests , please try again later"
 })
 
 app.use(limiter)
+// By default, $ and . characters are removed completely from user-supplied input in the following places:
+// - req.body
+// - req.params
+// - req.headers
+// - req.query
+
+// To remove data using these defaults:
+app.use(mongoSanitize())
 //Register webhook route with raw body parser BEFORE express.json()
 //This ensures the webhook receives raw body for signature verification
 

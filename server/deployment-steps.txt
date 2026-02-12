@@ -1,0 +1,116 @@
+https://dashboard.render.com/
+
+Step 1: Prepare Your MERN App
+
+Set Up Your MERN App: Make sure your MERN app is working perfectly on your local machine. Your app should be divided into client (React) and server (Node.js, Express) directories.
+Create a Production Build: Navigate to your React client directory and run:
+npm run build
+This will create a production build of your React app in a build folder.
+Step 2: Set Up a Git Repository
+
+Initialize a Git Repository: If you haven’t already, initialize a git repository in the root directory of your project:
+git init
+Commit Your Code: Add your files and make an initial commit:
+git add .
+git commit -m "Initial commit"
+Push to GitHub: Create a repository on GitHub and push your code to it:
+git remote add origin {your-github-repo-url}
+git push -u origin main
+Step 3: Set Up Render Account and New Web Service
+
+Sign Up or Log In to Render: Go to Render and sign up or log in to your account.
+Create a New Web Service: Click on the “New” button and select “Web Service.”
+Step 4: Connect to Your GitHub Repository
+
+Authorize GitHub: Connect Render to your GitHub account if you haven't done so already.
+Select Repository: Choose the repository that contains your MERN app
+Step 5: Configure the Service
+
+Basic Settings:
+Name: Choose a name for your service.
+Region: Select a region close to your users.
+Build Command: Add the build commands to set up your project. If your server code is in a folder named server, you might use:
+cd client && npm install && npm run build && cd ../server && npm install
+Start Command: Specify the command to start your server. For example:
+cd server && node server.js
+Step 6: Environment Variables
+
+Add Environment Variables: Click on “Add Environment Variable” to add any necessary environment variables such as MONGODB_URI, JWT_SECRET, etc.
+Step 7: Deploy
+
+Deploy Your App: Click “Create Web Service” to deploy your app. Render will pull the code from your GitHub repository, install dependencies, build the app, and start the server.
+Step 8: Make changes to server.js to serve the build
+
+const path = require("path");
+const app = express();
+const clientBuildPath = path.join(__dirname, "../client/build");
+console.log(clientBuildPath);
+
+
+app.use(express.static(clientBuildPath));
+app.get("*", (req, res) => {
+ res.sendFile(path.join(clientBuildPath, "index.html"));
+});
+app.use(express.static(clientBuildPath)) tells the Express application to serve static files from the clientBuildPath directory.
+This means any requests for static assets like JavaScript files, CSS files, images, etc., will be served from the client/build directory.
+app.get("*", (req, res) => { res.sendFile(path.join(clientBuildPath, "index.html")); }); sets up a catch-all route.
+The * wildcard matches any route that hasn’t been matched by previous route handlers.
+This route handler serves the index.html file for any request that doesn't match a static file or an API route.
+This is particularly important for single-page applications (SPAs) like React, where routing is handled client-side. Serving the index.html file ensures that the React app can take over routing from there.
+Step 9: remove proxy from client / package.json
+Update cors in server.js
+
+const cors = require("cors");
+const app = express();
+
+
+// Enable CORS
+// app.use(
+//   cors({
+//     origin: ["http://localhost:3000", "https://your-production-url.com"]
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     credentials: true, // Allow credentials such as cookies, authorization headers
+//   })
+// );
+app.use(
+ cors({
+   origin: "*", // Allow only your frontend origin
+   methods: ["GET", "POST", "PUT", "DELETE"],
+   allowedHeaders: ["Content-Type", "Authorization"],
+ })
+);
+This might still give issue and that is because the baseURL in axios instance is still 3000. Should change to production url if needed
+
+import axios from "axios";
+
+export const axiosInstance = axios.create({
+ baseURL: "https://test3-99k4.onrender.com/",
+ headers: {
+   "Content-Type": "application/json",
+   authorization: `Bearer ${localStorage.getItem("token")}`,
+ },
+});
+If getting csp:blocked error
+
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         scriptSrc: [
+//           "'self'",
+//           "'unsafe-inline'",
+//           "'unsafe-eval'",
+//           "https://your-production-url.com", // Replace with your actual production URL
+//         ],
+//         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+//         imgSrc: ["'self'", "data:", "https://your-production-url.com"], // Replace with your actual production URL
+//         connectSrc: ["'self'", "https://your-production-url.com"], // Your API domain
+//         fontSrc: ["'self'", "https://fonts.gstatic.com"],
+//         objectSrc: ["'none'"],
+//         upgradeInsecureRequests: [],
+//       },
+//     },
+//   })
+// );
