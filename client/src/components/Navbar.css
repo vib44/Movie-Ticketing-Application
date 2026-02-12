@@ -95,6 +95,21 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+.ticket {
+  display: inline-block;
+  transform: rotate(-15deg);
+  transition: transform 0.3s ease;
+}
+
+.logo:hover .ticket {
+  transform: rotate(0deg) scale(1.1);
+}
+
+.ticket {
+  display: inline-block;   /* required for transform */
+  transform: rotate(-15deg);
+}
+
 /* Actions Section */
 .navbar-actions {
   display: flex;

@@ -55,8 +55,8 @@ function Navbar() {
               : userData?.role === "admin" ? "/admin"
                 : "/home"
           } className="navbar-brand">
-            <Text strong className="brand-text">
-              BookTheShow
+            <Text strong className="brand-text logo">
+               Movixa<span className="ticket">🎟️</span>
             </Text>
           </Link>
 

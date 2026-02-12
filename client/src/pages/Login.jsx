@@ -56,7 +56,7 @@ return<>
                   {/*<VideoCameraOutlined className="brand-icon"/>*/}
                   <div className='brand-icon'>🎟️</div>
                   <Title level={1} className="brand-title">
-                    BookTheShow
+                    Movixa
                   </Title>
                   <Text className="brand-subtitle">
                     Book your favorite shows on your fingertips 
