@@ -56,7 +56,7 @@ function Navbar() {
                 : "/home"
           } className="navbar-brand">
             <Text strong className="brand-text">
-              Showbook
+              BookTheShow
             </Text>
           </Link>
 

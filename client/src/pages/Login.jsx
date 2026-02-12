@@ -53,12 +53,13 @@ return<>
             <div className="auth-container">
               <div className="auth-left">
                 <div className="auth-brand">
-                  <VideoCameraOutlined className="brand-icon"/>
+                  {/*<VideoCameraOutlined className="brand-icon"/>*/}
+                  <div className='brand-icon'>🎟️</div>
                   <Title level={1} className="brand-title">
-                    Showbook
+                    BookTheShow
                   </Title>
                   <Text className="brand-subtitle">
-                    Your Gateway to Cinematic Magic
+                    Book your favorite shows on your fingertips 
                   </Text>
                 </div>
               </div> 
