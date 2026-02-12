@@ -5,18 +5,23 @@ import {getCurrentUser} from "../backend/auth"
 import {setUserData} from "../redux/userSlice"
 
 function ProtectedRoute({children}) {
-  const { userData } = useSelector((state)=>state.user);
+  const { userData, loading } = useSelector((state)=>state.user);
   const dispatch= useDispatch();
 
   useEffect(()=>{
 
     const fetchUserData = async ()=>{
- if (!userData)
+ 
     try {
+      if(loading) return null;
+      if (!userData){
       const user=await getCurrentUser();
       if(user)
-          {dispatch(setUserData(user))}
-    } catch (error) {
+          {dispatch(setUserData(user))
+            console.log("ProtectedRoute: UserData is set",userData)
+          }
+    } 
+  }catch (error) {
       console.error("Error fetching user data:",error)
     }
   }
@@ -24,8 +29,6 @@ function ProtectedRoute({children}) {
   fetchUserData();
   },[userData, dispatch])
 
-  if(!userData)
-      return <Navigate to="/login"/>
       
 return children;
 

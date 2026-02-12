@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch } from "react-redux"
+import {fetchCurrentUser} from "./redux/userSlice"
 import "./App.css"
 import Login from "./pages/Login"
 import Home from "./pages/Home"
@@ -49,7 +51,11 @@ function App() {
           </ProtectedRoute>}/>
 
          <Route path="/payment-success" 
-         element={<PaymentSuccess />}
+         element={<ProtectedRoute>
+          <RoleBasedRoute allowedRole={["user"]}>
+          <PaymentSuccess />
+          </RoleBasedRoute>
+          </ProtectedRoute>}
             />
 
           <Route path="/my-bookings" element={<ProtectedRoute>
