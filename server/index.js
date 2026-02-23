@@ -7,7 +7,7 @@ const cookieParser= require("cookie-parser")
 const rateLimit=require('express-rate-limit')
 const mongoSanitize=require('express-mongo-sanitize') //a standalone module that sanitizes inputs against query selector injection attacks:
 const path = require("path");
-const clientBuildPath = path.join(__dirname, "../client/build");
+const clientBuildPath = path.join(__dirname, "../client/dist");
 console.log(clientBuildPath);
 
 app.use(express.static(clientBuildPath));
@@ -151,7 +151,7 @@ app.use(express.json())
 
 app.use(
  cors({
-   origin: "https://movie-ticketing-application.onrender.com/",
+   origin: process.env.CLIENT_URL,
    methods: ["GET", "POST", "PUT", "DELETE"],
    allowedHeaders: ["Content-Type", "Authorization"],
  })
@@ -164,7 +164,8 @@ app.use("/api/theatre",theatreRoutes)
 app.use("/api/show",showRoutes)
 app.use("/api/booking",bookingRoutes)
 
-app.listen(8001,()=>
+//Render automatically injects a PORT variable for you.
+app.listen(process.env.PORT || 8001,()=>
 {
     console.log("Server started...")
 })
