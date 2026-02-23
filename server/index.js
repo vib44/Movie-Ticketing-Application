@@ -6,6 +6,14 @@ const cors= require("cors")
 const cookieParser= require("cookie-parser")
 const rateLimit=require('express-rate-limit')
 const mongoSanitize=require('express-mongo-sanitize') //a standalone module that sanitizes inputs against query selector injection attacks:
+const path = require("path");
+const clientBuildPath = path.join(__dirname, "../client/build");
+console.log(clientBuildPath);
+
+app.use(express.static(clientBuildPath));
+app.get("*", (req, res) => {
+ res.sendFile(path.join(clientBuildPath, "index.html"));
+});
 
 dotEnv.config();
 dbConfig.connectDb()

@@ -42,7 +42,8 @@ cd server && node server.js
 
 Step 6: Environment Variables
 
-Add Environment Variables: Click on “Add Environment Variable” to add any necessary environment variables such as MONGODB_URI, JWT_SECRET, etc.
+Add Environment Variables:
+Click on “Add Environment Variable” to add any necessary environment variables such as MONGODB_URI, JWT_SECRET, etc.
 
 Step 7: Deploy
 
@@ -92,7 +93,8 @@ app.use(
    allowedHeaders: ["Content-Type", "Authorization"],
  })
 );
-This might still give issue and that is because the baseURL in axios instance is still 3000. Should change to production url if needed
+This might still give issue and that is because the baseURL 
+in axios instance is still 3000. Should change to production url if needed
 
 import axios from "axios";
 
