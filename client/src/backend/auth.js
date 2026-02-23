@@ -2,7 +2,11 @@ import axios from 'axios'
 import {API_BASE_URL} from "./config"
 
 const api= axios.create({baseURL: API_BASE_URL,
-    withCredentials: true
+    withCredentials: true,
+    headers: {
+   "Content-Type": "application/json",
+   authorization: `Bearer ${localStorage.getItem("token")}`,
+ },
 });
 
 export const register= async(values)=>
