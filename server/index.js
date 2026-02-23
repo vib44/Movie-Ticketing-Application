@@ -12,7 +12,7 @@ const theatreRoutes= require("./routes/theatre_route.js")
 const showRoutes=require("./routes/show_route.js")
 const bookingRoutes=require("./routes/booking_route.js")
 const path = require("path");
-const clientBuildPath = path.join(__dirname, "../client/build");
+const clientBuildPath = path.join(__dirname, "../client/dist");
 console.log(clientBuildPath);
 
 dotEnv.config();
