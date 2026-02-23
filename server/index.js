@@ -6,25 +6,19 @@ const cors= require("cors")
 const cookieParser= require("cookie-parser")
 const rateLimit=require('express-rate-limit')
 const mongoSanitize=require('express-mongo-sanitize') //a standalone module that sanitizes inputs against query selector injection attacks:
-const path = require("path");
-const clientBuildPath = path.join(__dirname, "../client/build");
-console.log(clientBuildPath);
-
-app.use(express.static(clientBuildPath));
-app.get("*", (req, res) => {
- res.sendFile(path.join(clientBuildPath, "index.html"));
-});
-
-dotEnv.config();
-dbConfig.connectDb()
-
 const userRoutes=require("./routes/user_route.js")
 const movieRoutes= require("./routes/movie_route.js")
 const theatreRoutes= require("./routes/theatre_route.js")
 const showRoutes=require("./routes/show_route.js")
 const bookingRoutes=require("./routes/booking_route.js")
+const path = require("path");
+const clientBuildPath = path.join(__dirname, "../client/build");
+console.log(clientBuildPath);
 
+dotEnv.config();
+dbConfig.connectDb()
 
+//Security Middleware
 const limiter=rateLimit({
     windowMs: 15*60*1000, //15minutes
     limit: 100, //Limit each IP to 100 requests per `window`(here,per 15 minutes).
@@ -40,9 +34,10 @@ app.use(limiter)
 
 // To remove data using these defaults:
 app.use(mongoSanitize())
+
+
 //Register webhook route with raw body parser BEFORE express.json()
 //This ensures the webhook receives raw body for signature verification
-
 app.post("/api/booking/webhook",
     express.raw({type:"application/json"}),
     async(req,res)=>{
@@ -147,8 +142,11 @@ app.post("/api/booking/webhook",
         }
     }    
 )
+
+//BODY PARSER
 app.use(express.json())
 
+//CORS
 app.use(
  cors({
    origin: process.env.CLIENT_URL,
@@ -158,12 +156,22 @@ app.use(
 );
 
 app.use(cookieParser())
+
+//ROUTES
 app.use("/api/auth",userRoutes)
 app.use("/api/movie",movieRoutes)
 app.use("/api/theatre",theatreRoutes)
 app.use("/api/show",showRoutes)
 app.use("/api/booking",bookingRoutes)
 
+//REACT STATIC
+
+app.use(express.static(clientBuildPath));
+app.get("*", (req, res) => {
+ res.sendFile(path.join(clientBuildPath, "index.html"));
+});
+
+//SERVER
 //Render automatically injects a PORT variable for you.
 app.listen(process.env.PORT || 8001,()=>
 {
