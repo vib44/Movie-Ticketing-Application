@@ -7,7 +7,7 @@ const cookieParser= require("cookie-parser")
 const rateLimit=require('express-rate-limit')
 const mongoSanitize=require('express-mongo-sanitize') //a standalone module that sanitizes inputs against query selector injection attacks:
 const path = require("path");
-const clientBuildPath = path.join(__dirname, "../client/dist");
+const clientBuildPath = path.join(__dirname, "../client/build");
 console.log(clientBuildPath);
 
 app.use(express.static(clientBuildPath));
